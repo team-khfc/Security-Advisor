@@ -83,6 +83,16 @@ async function inspect(page, name, screenshot = true) {
           .trim(),
       ]),
     ),
+    searchTextGap: (() => {
+      const input = document.querySelector(".gsearch input");
+      const icon = document.querySelector(".gsearch .gs-ic svg");
+      if (!input || !icon) return null;
+      return (
+        input.getBoundingClientRect().left +
+        parseFloat(getComputedStyle(input).paddingLeft) -
+        icon.getBoundingClientRect().right
+      );
+    })(),
   }));
   assert(
     metrics.bodyFontSize >= 17,
@@ -103,6 +113,12 @@ async function inspect(page, name, screenshot = true) {
   );
   for (const [token, value] of Object.entries(metrics.colorTokens)) {
     assert(value, `${name}: --sf-${token} must resolve without a CSS cycle`);
+  }
+  if (metrics.searchTextGap !== null) {
+    assert(
+      metrics.searchTextGap >= 4,
+      `${name}: search icon overlaps the input text`,
+    );
   }
   results.push({ check: name, result: "PASS", ...metrics });
   if (screenshot)
@@ -357,6 +373,13 @@ try {
   const administrator = await account("ADMIN");
   await administrator.page.goto("/admin/workflow");
   await inspect(administrator.page, "administrator-workflow");
+  assert.equal(
+    await administrator.page
+      .locator(".side")
+      .getByRole("link", { name: "기관 설정", exact: true })
+      .getAttribute("aria-current"),
+    "page",
+  );
   assert.match(
     await administrator.page.locator("main").innerText(),
     /ICT인프라/,
@@ -369,6 +392,18 @@ try {
   });
   await mobile.page.goto("/requests");
   await inspect(mobile.page, "requests-mobile");
+  const headingOffset = await mobile.page.evaluate(() => {
+    const main = document.querySelector("main");
+    return (
+      main.querySelector("h1").getBoundingClientRect().left -
+      main.getBoundingClientRect().left -
+      parseFloat(getComputedStyle(main).paddingLeft)
+    );
+  });
+  assert(
+    Math.abs(headingOffset) <= 2,
+    "Mobile heading aligns to the main content start",
+  );
   const menu = mobile.page.getByRole("button", { name: "메뉴", exact: true });
   await menu.click();
   assert.equal(await menu.getAttribute("aria-expanded"), "true");

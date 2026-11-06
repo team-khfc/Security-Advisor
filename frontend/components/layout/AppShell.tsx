@@ -347,6 +347,9 @@ export function AppShell({
               {nav.map((item) => {
                 const active =
                   pathname === item.href ||
+                  (item.href === '/admin/questions' &&
+                    ['/admin/workflow', '/admin/versions'].includes(pathname)) ||
+                  (item.href === '/requests' && pathname === '/workspace') ||
                   (item.href === '/requests' &&
                     pathname.startsWith('/requests/') &&
                     pathname !== '/requests/new');

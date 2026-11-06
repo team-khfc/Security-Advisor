@@ -252,9 +252,9 @@ html[data-scale='1.25'] {
 .prototype-app .org {
   white-space: nowrap;
 }
-.prototype-app .gsearch .input {
+.prototype-app .gsearch input.input {
   min-height: 4.4rem;
-  padding: 0 7.2rem 0 4rem;
+  padding: 0 7.2rem 0 4.8rem;
   background: var(--sf-surface);
 }
 .prototype-app .gs-ic {
@@ -315,6 +315,7 @@ html[data-scale='1.25'] {
   margin-top: 1.2rem;
 }
 .page-head.sf-heading {
+  flex-direction: row;
   align-items: flex-end;
   flex-wrap: wrap;
   gap: 1.6rem 2.4rem;
@@ -520,7 +521,7 @@ html[data-scale='1.25'] {
     min-width: min(100%, 20rem);
     flex: 1 1 100%;
   }
-  .prototype-app .gsearch .input {
+  .prototype-app .gsearch input.input {
     width: 100%;
     padding-right: 1.2rem;
   }
