@@ -1,0 +1,8 @@
+# loopback에 바인딩한 합성 시연 HTTP에만 적용한다. TLS 운영은 기본 Secure 쿠키를 쓴다.
+server:
+  address: ${SECURITYADVISOR_BIND_ADDRESS:${BOAN_BIND_ADDRESS:127.0.0.1}}
+  servlet:
+    session:
+      cookie:
+        secure: false
+

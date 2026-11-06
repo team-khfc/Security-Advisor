@@ -1,0 +1,4 @@
+node_modules
+.next
+public/assets
+next-env.d.ts

@@ -1,0 +1,182 @@
+# SecurityAdvisor 디자인 기준과 실제 UI 대응
+
+2026-11-06 · 기준: **design.md v3.1**, **FUNCTIONAL_SPEC.md v1.2** · 참고 저장소: `team-khfc/prototype`, **source commit `3900181`**
+
+이 문서는 현재 React 구현이 어떤 시안과 규칙을 적용했고, 어디까지 동작·검증했는지 기록한다. 코드에 반영된 사실, 자동 검사 결과, 아직 수행하지 못한 브라우저 검증을 구분한다. 개발 시작점의 기존 React/API 구현을 독립 복사한 뒤 최신 디자인과 업무 규칙에 맞게 보강했으며, 이전 구현을 전혀 참조하지 않은 신규 제작으로 설명하지 않는다.
+
+## 1. 기준과 원본의 위치
+
+| 구분 | 기준·위치 | 적용 방법 |
+| --- | --- | --- |
+| 화면·접근성 기준 | [design.md](../design.md) v3.1, 특히 4~8장·10~13장·부록 A | 글자 크기·토큰·상태·반환·읽기 전용·셸의 현재 기준 |
+| 업무 의미 | [FUNCTIONAL_SPEC.md](../claude/FUNCTIONAL_SPEC.md) v1.2 | 역할 4종, 서류 2종, 4단계, INFRA 선행, 출처·버전·반환 불변식 |
+| 원본 정적 시안 | `보안길잡이 디자인시안 프로토타입/` | `3900181`에서 취득한 별도 참고 자료. 실제 업무 애플리케이션과 구분 |
+| 시안 내부 판본 | design.md v3.1이 대조한 디자인 변경점 `07c2b59` | 문서의 시안 비교 기준이며, 이번 저장소 취득 커밋 `3900181`과 같은 의미로 쓰지 않음 |
+| 실제 프런트엔드 | `frontend/app/`, `frontend/components/`, `frontend/features/` | Next.js 경로와 React 컴포넌트, 실제 인증·업무 API 연결 |
+| API 계약 | [CONTRACT.md](CONTRACT.md) | 서버의 기관·권한·revision·전이 검증에 맞춰 요청 |
+| 검사 근거 | [프런트 검증 기록](../frontend/verification/validation-2026-11-06.txt) | 실제 도구 실행 출력의 요약 기록. raw shell 캡처는 아님 |
+
+서비스 이름은 현재 사용자 지침에 따라 **SecurityAdvisor**를 사용한다. 원본 시안의 ‘보안길잡이 AI’ 헤더 이름을 그대로 유지하지 않는다. 한국어 설명에는 ‘보안길잡이’를 사용할 수 있다. 헤더는 React 아이콘과 서비스 텍스트로 구성했으며 원본 PNG 로고를 그대로 이식했다고 설명하지 않는다.
+
+원본 정적 폴더에는 `requests.html`, `new-request.html`, `request-detail.html`, `supplements.html`, `submitted.html`, `documents.html`, `network.html`, `history.html`, `policies.html`, `settings.html`과 공통 `partials/shell.html`, `assets/css/`, `assets/js/`가 있다. 정적 시안의 브라우저 저장소·역할 선택·고정 결과·외부 스크립트 동작은 실제 인증·서버 처리의 구현 근거가 아니다.
+
+## 2. 적용 CSS·폰트와 공통 셸
+
+### 자산의 책임
+
+| 경로 | 현재 책임 |
+| --- | --- |
+| `frontend/public/assets/design/` | 모듈형 시안 CSS를 바탕으로 한 **적용본**. `base.css`의 루트와 `main`을 v3.1 부록 A에 맞게 조정 |
+| `frontend/public/assets/vendor/krds/css/token/krds_tokens.css` | 고정된 KRDS 원본 토큰. 원본 파일에 프로젝트 색을 덮어쓰지 않음 |
+| `frontend/public/assets/vendor/krds/fonts/` | 실제 `PretendardGOV-Regular.subset.woff2`, `PretendardGOV-Bold.subset.woff2` 파일 |
+| `frontend/public/assets/vendor/krds/Pretendard-LICENSE.txt` | 폰트 라이선스 |
+| `frontend/styles/fonts.css` | Pretendard GOV 400/700 로컬 `@font-face` 선언 |
+| `frontend/styles/tokens.css` | KRDS 원본과 프로젝트 의미 토큰 연결, 호환 별칭·레이어 값 |
+| `frontend/styles/components.css` | React 공통 셸·입력·버튼·표·모달 구조 |
+| `frontend/styles/application.css` | 업무 화면·4단계·반환·반응형 구성 |
+| `frontend/styles/accessibility.css` | 글자 확대·다크 모드 보완·초점·반환 표시·터치 영역 규칙 |
+
+`frontend/public/assets/design/`은 원본 정적 CSS와 **바이트 단위 동일성을 보장하는 보관본이 아니다.** 원본은 별도 정적 폴더에서 참조하고 실제 적용 차이는 이 문서에 기록한다. 폰트 파일·라이선스는 로컬로 제공하며 런타임 외부 폰트 CDN에 의존하지 않는다. 이번 작업에서 폰트 blob 해시를 새로 대조했다고 주장하지 않는다.
+
+### 코드에 반영한 공통 규칙
+
+- 기본 루트는 `62.5%`, 본문은 `1.7rem`, 행간은 `1.5`다. 브라우저 기본 글자 크기 16px에서 본문 목표는 **17px**이다. 원본 `56.25%`와 `main { zoom: .9 }`를 적용본에서 제거했다. 사용자 브라우저 확대를 제한하지 않는다.
+- 글자 크기는 보통·크게·아주 크게의 3개 선택을 제공한다. `sf-scale`과 `sf-theme`에는 비민감 표시 설정만 저장한다. 업무 답변·첨부·기관 컨텍스트를 영구 브라우저 저장소에 저장하지 않는다.
+- **1920px 최대 폭의 가운데 정렬 셸**, 데스크톱 **240px 메뉴**, `minmax(0, 1fr)` 본문을 사용한다. 좁은 화면에서는 메뉴 열기와 한 열 배치, 표의 독립 스크롤을 제공한다.
+- 운영체제의 밝기 설정을 기본으로 하고 밝게·어둡게 선택도 제공한다. 상태·배경·글자·경계와 주요 버튼의 `on-primary` 색을 의미 토큰으로 연결한다. 다크 모드의 실제 조합별 대비 측정은 미검증이다.
+- 제목과 주요 입력·업무 상태를 작은 메타 글자로 축소하지 않도록 보강했다. 본문 목표와 별도로 도움말·배지·메타는 역할에 맞는 크기를 사용한다. 모든 요소가 17px이라는 뜻은 아니다.
+- 주요 행동은 페이지 단위로 선택하고 보조 저장·조회는 하위 강조로 둔다. 모달은 별도의 결정 영역이다. 모든 화면 상태에서 최상위 강조가 1개 이하인지 브라우저로 전수 검사한 것은 아니다.
+- 본문 바로가기, 제목 갱신, 현재 메뉴의 `aria-current`, 입력 레이블, 상태 문구와 색의 병행, 키보드 초점 표시를 제공한다. 모달은 네이티브 `dialog`를 사용하고 닫기 버튼을 DOM 마지막에 둔다.
+- 인증된 업무 셸에는 반복적인 프로토타입 배너를 넣지 않는다. 공개 디자인 미리보기에는 ‘합성 데이터·읽기 전용’을 표시한다. 실제 운영 주체·연락처·개인정보 처리방침은 확정 전이므로 임의 정보를 만들지 않는다. 푸터는 서비스명과 Team HF 저작권을 표시한다.
+
+위 항목은 코드 반영 상태다. KRDS 전체 준수, 접근성 인증, 실제 브라우저에서의 모든 크기·대비·초점 동작 통과를 뜻하지 않는다.
+
+## 3. 원본 화면과 실제 경로
+
+모듈형 원본의 화면 한 개가 여러 업무 경로로 나뉘거나, 여러 경로가 같은 React 뷰를 재사용한다. 이전의 `01-workspace.html`부터 `16-components.html`까지의 번호형 목록을 최신 원본 파일 목록으로 사용하지 않는다.
+
+| 원본 참고 | 실제 경로 | 주요 구현 | 적용한 규칙·동작 |
+| --- | --- | --- | --- |
+| `requests.html`, 공통 셸 | `/requests`, `/workspace` | `RequestsView`, `WorkspacePage`, `AppShell` | 역할별 진입, 4개 요약 필터, 신청 목록, 단계·다음 할 일·상태·변경 시각. 관리자에게 일반 신청 열람 권한을 추가하지 않음 |
+| `new-request.html` | `/requests/new` | `CreatePage` | 사업명·개요·부서·서류 유형으로 서버 초안 생성. 생성 시점의 게시본 고정 |
+| `new-request.html` | `/requests/{id}/analysis` | `AnalysisPage`, `AnalysisView` | 선택과 전송 분리, 실제 지원 형식·용량 안내, 명시적 분석 시작, 원문 근거·미확정 후보·예시/실제 모드·실패 표시 |
+| `new-request.html` | `/requests/{id}/questions` | `AnswerEditor`, `AnswerFields`, `DocumentPreview` | 역할별 질문·작성 이유·필수 시점, 출처와 확인 상태, 저장 전 값 보존, 반환 항목 비교 |
+| `new-request.html` | `/requests/{id}/summary` | `SummaryPage` | 현재 수집 정보와 기관 설정 버전 확인, 사전 협의 요청을 별도 행동으로 실행 |
+| `request-detail.html` | `/requests/{id}/infra` | `DetailView`, `NetworkEditor`, `ReviewPanel` | 담당자 통신 정보 입력, **할당 완료와 협의 완료를 별도로 기록**, 반환 대상 통신 정보 강조 |
+| `request-detail.html` | `/requests/{id}/security` | `DetailView`, `ReviewPanel`, `StaffAssistant` | INFRA 할당 조건 안내, 보안 분야 검토·의견·보완·협의, 근거 있는 담당자 질의 |
+| `supplements.html`, 상세 | `/supplements`, `/requests/{id}/supplement` | `RegisterView`, `SupplementEntry`, `ReturnNotice` | 보완 요청·답변·해소와 차수 반환 구분, 사유·작성자·시각·항목 링크 |
+| `submitted.html`, 상세 | `/requests/{id}/submit` | `SubmitPanel`, `FinalDraftPanel` | 3단계 AI 최종 초안도 미확정, 사람 확인과 서버 제출 검사, 제출 확인·취소 |
+| `submitted.html`, 상세 | `/requests/{id}/receipt` | `ReceiptPage`, `ReviewProgress`, `WorkflowActions` | 제출본과 양측 최종 확인, 서류 확정, 종결·철회 사유와 읽기 전용 상태. 방화벽 적용과 구분 |
+| `documents.html` | `/documents` 및 상세의 문서 영역 | `RegisterView`, `DocumentPanel`, `SubmissionHistory` | 현재 초안·제출 차수 조회, React 미리보기, 서버 HTML 다운로드 |
+| `network.html` | `/network` | `RegisterView`, `NetworkTable` | 권한 범위 안의 신청별 통신 정보 조회. 장비 정책·트래픽 수집은 연결하지 않음 |
+| `history.html` | `/history` 및 신청 상세 | `RegisterView`, 상세 타임라인 | 작성·반환·협의·제출·확정 이력의 주체와 시각 |
+| `settings.html` | `/admin/questions` | `AdminView`, `SettingsEditor` | 텍스트형 추가 질문의 문구·키·역할·필수 시점, 수정 초안과 게시 구분 |
+| `settings.html` | `/admin/workflow` | `AdminView` | **INFRA → SECURITY 고정값**, 필수 역할 읽기 전용, 생성 문서 안내 문구 편집 |
+| `settings.html` | `/admin/versions` | `SettingsEditor` | 수정 초안 저장, 게시 전 변경 비교, 게시본 이력, 기존 신청의 설정 유지 |
+| 기능 명세 확장 | `/admin/models` | `ModelConnectionsPage` | 목적별 모델 구성·키 환경변수 참조·예시/실제 설정. 구성 저장과 모델 실행 성공을 구분 |
+| 기능 명세 확장 | `/admin/context`, `/institution/context` | 기관 컨텍스트 컴포넌트 | 공개 지식과 기관 사실 분리, 서버가 허용한 관리·조회 |
+| 기능 명세 확장 | `/knowledge` | `KnowledgePage` | 공개 자료 목록과 편집 요약 범위 검색, 원문·판본 표시 |
+| 인증 요구 | `/login` | `Authentication` | 서버 세션·CSRF·재인증, 허용된 로그인 방식만 제공 |
+| React 공통 확인용 | `/components` | 공통 UI 예시 | 배지·입력·메시지·단계 등의 구현 상태 확인. 독립 인증·접근성 검사 결과가 아님 |
+
+원본 `policies.html`의 정책 수명주기·실제 방화벽 정책 관리에 대응하는 완성 기능은 없다. 원본 파일이 존재한다는 이유로 `/policies`나 장비 적용 기능을 구현했다고 계산하지 않는다.
+
+## 4. 업무 상태와 반환·종료의 대응
+
+### 네 단계와 역할
+
+1. **작성**: 사용자와 AI가 필요한 정보를 수집한다. AI 추출·보완값은 근거와 함께 미확정으로 표시한다.
+2. **담당자 협의**: INFRA가 서버·IP·포트를 할당한 후 SECURITY가 검토한다. INFRA의 할당만 끝나고 자기 분야 협의는 보류할 수 있다.
+3. **사용자 최종 검토**: 보완 답변과 AI 최종 초안을 사람이 확인한 뒤 제출한다.
+4. **확정·관리**: 제출본을 양측이 최종 확인한 뒤 서류를 확정한다. 서류 확정은 실제 방화벽 적용이 아니다.
+
+APPLICANT·INFRA·SECURITY·ADMIN 네 역할을 유지한다. 시안의 부서장 확인이나 순차/동시 선택을 근거로 별도 승인 역할·정책을 추가하지 않는다. 단계 링크를 통한 조회는 서버 업무 상태를 바꾸지 않는다.
+
+| 대상 | 실제 UI 반영 |
+| --- | --- |
+| 할당 완료 | 파랑 배지. 검토 중·정보 상태로 구분하며 협의 완료의 초록을 사용하지 않음 |
+| 분야별 협의 완료 | 해당 수정본의 완료 검토에 초록 배지. INFRA와 SECURITY를 독립 표시 |
+| 재검토 | 변경·반환의 영향을 받은 확인 상태와 사유를 별도 표시 |
+| 반환 알림 | 반환 전·후 단계, 사유, 반환 주체·시각, 대상 항목 링크를 신청 상단에 유지 |
+| 반환 항목 | 기존 값을 지우지 않고 지정·연관 항목에만 왼쪽 경계·배경·‘보완 필요’와 사유 표시 |
+| 반환 전 값 | 서버의 nullable `returnItems.previousValue`를 사용해 원래 답변 또는 통신 규칙을 비교. 구버전 기록에 값이 없으면 과거 값을 임의 생성하지 않음 |
+| 반환 실행 | 허용된 2→1·3→2·3→1·4→3 범위, 사유·대상 선택, `n단계로 반환` 버튼. 필수 정보가 없으면 오류를 안내하고 요청하지 않음 |
+| 종결·철회 | 사유와 종료 이력 안내, 읽기 전용. 종료 상태이면 남아 있는 action 목록과 관계없이 workflow 수정 행동을 표시하지 않음 |
+| 종료 후 목록 | 멈춘 단계의 막대를 회색으로 표시하고 ‘종결(반려)’·‘철회’ 문구로 구분 |
+| 종료 후 조회 | 기존 정보·출처·변경 이력·권한 있는 문서 조회/다운로드 유지 |
+
+`previousValue`는 반환 당시 서버가 보존하는 값이다. 편집 화면에서 저장 전 값이 달라질 때 비교할 수 있고, 상세 수집 정보에서는 보존된 반환 이력의 이전 값을 조회한다. 통신 규칙은 사람이 읽을 수 있는 문자열로 제공한다. 과거 기록에서 이 필드가 없는 경우의 호환성을 위해 프런트 스키마는 누락·null을 허용한다.
+
+반환 해소·재검토의 최종 판단, 기관 격리, 수정 권한, revision 충돌은 서버가 결정한다. UI의 색·확인 체크·로그인 역할 값만으로 상태를 확정하지 않는다.
+
+## 5. 실제 API 동작과 시안 동작의 차이
+
+| 주제 | 현재 구현 | 남은 범위·주의 |
+| --- | --- | --- |
+| 업무 저장 | 인증된 서버 API의 성공 응답 후 결과 표시 | 미저장 입력은 같은 탭 메모리에서 보존. 새로고침·브라우저 종료 후 미저장 복구는 미지원 |
+| 충돌·실패 | 오류·409에서 입력 유지, 최신 저장값 비교 후 재적용 | 실패를 저장 성공·협의 완료로 표시하지 않음 |
+| 파일 | UTF-8 TXT/MD, 1MiB 이하 1개, 선택과 전송 분리 | PDF·DOCX 분석이나 10MB 업로드를 지원한다고 표시하지 않음 |
+| AI | EXAMPLE/LIVE 실행 모드·근거·미확정 상태 표시 | 모델 구성 저장은 실제 모델 실행 성공의 증거가 아님 |
+| 문서 | React 미리보기와 서버 HTML 다운로드, 제출 차수 조회 | 공식 양식 업로드·PDF·DOCX 발급 미구현. 문서 형식·용량 안내의 전체 기준 충족 여부는 별도 확인 필요 |
+| 공개 지식 | 등록한 공개 원문의 편집 요약 검색 | 공식 PDF 전문 색인으로 설명하지 않음 |
+| 초안·게시 | 수정 초안 저장과 게시를 구분, 새 신청부터 새 게시본 적용 | 질문의 모든 조건·형식 편집을 구현한 것은 아님 |
+| 검토 순서 | INFRA 선행 고정 | 병렬·임의 순서 변경, 별도 관리자 승인 역할 없음 |
+| 알림·장비 연계 | 관련 상태·안내와 내부 조회 | 외부 알림 발송, ITSM·전자결재, 실제 방화벽 조회·적용·트래픽 수집 미연결 |
+
+업로드·AI 텍스트는 React 텍스트로 표시하며 명령이나 검증 없는 HTML로 실행하지 않는다. 모든 시연 자료는 합성 데이터이고 실제 내부망 IP·서버·자산·개인정보·비밀값을 예시 자료로 사용하지 않는다.
+
+## 6. 공개 읽기 전용 미리보기
+
+`/design-preview/*`는 인증 업무와 구분한 합성 fixture 화면이다. 주요 화면에서 동일한 `AppShell`, `RequestsView`, `DetailView`, `AnalysisView`, `AdminView`, `RegisterView`를 재사용한다. `/design-preview/workspace`는 현재 신청 목록 뷰로 연결되며 별도의 최신 대시보드 구현으로 세지 않는다.
+
+| 목적 | 미리보기 경로 |
+| --- | --- |
+| 목록·작성 | `/design-preview/requests`, `/design-preview/new-request`, `/design-preview/analysis`, `/design-preview/interview` |
+| 담당자 | `/design-preview/infra`, `/design-preview/security` |
+| 반환·최종 검토 | `/design-preview/returned`, `/design-preview/final-review` |
+| 제출·확정 | `/design-preview/submitted`, `/design-preview/confirmed` |
+| 종료 | `/design-preview/closed`, `/design-preview/withdrawn` |
+| 자료 목록 | `/design-preview/documents`, `/design-preview/network`, `/design-preview/history`, `/design-preview/supplements` |
+| 기관 설정 | `/design-preview/admin?tab=questions`, `workflow`, `versions`, `models`, `context` |
+
+읽기 전용 미리보기는 합성 화면 검토용이다. 필터·화면 이동·모달 미리보기는 가능하지만 업무 저장·업로드·다운로드·게시 성공을 만들어 내지 않는다. 예시 AI 출력은 예시 분석·미확정으로 표시한다. 모의 자료를 본 사실을 실제 모델 실행이나 기관 권한 검사 통과로 계산하지 않는다.
+
+## 7. 최신 기준과 남은 차이
+
+아래 항목은 자동 준수 예외가 아니라 후속 구현·검증 대상이다.
+
+| 기준 | 현재 상태 |
+| --- | --- |
+| 부록 A-1~A-5: 글자·터치·폰트·최대 폭·메뉴 폭 | 17px 기본·zoom 제거·로컬 폰트·1920px 셸·240px 메뉴를 코드에 반영. 실제 크기와 모든 터치 대상 측정은 브라우저 미검증 |
+| 부록 A-6: 공식 토큰 | 로컬 공식 토큰을 먼저 로드하고 프로젝트 의미 토큰과 연결. 모든 상태의 색 대비 측정은 미검증 |
+| 부록 A-7: 운영 푸터 | 시연 저작권 제공. 운영 주체·연락처·개인정보 처리방침은 운영기관 확정 후 반영 |
+| 부록 A-8: 초안 저장 | 서버 초안 저장과 같은 탭 미저장 메모리 분리. 새로고침 이후 미저장 복원은 미지원 |
+| 부록 A-9~A-11: 단계·고정 순서·반환·종료 | 네 단계, 고정 INFRA 선행, 할당 분리, 반환 이전 값·필드 강조, 종료 읽기 전용 반영. 일부 세부 상태는 ‘양측 최종 확인’ 등 다음 행동을 설명하는 문구를 사용하며 상태 사전의 문자열과 전부 동일하지 않음 |
+| 부록 A-12: 세션 | 서버 세션·재인증과 만료 안내 코드가 있음. 경고 노출 시점·10회 이상 연장·포커스 복귀의 실제 브라우저 검증은 미완료 |
+| 부록 A-13: 런타임 외부 라이브러리 | 정적 시안의 CDN 기반 문서 파싱 흐름을 업무 화면으로 가져오지 않음. 현재 지원 분석은 서버 처리 범위로 한정 |
+| 부록 A-14 / 8.5: 처리 기한 | **공휴일을 반영한 영업일 기한 계산은 미구현**. 목록은 처리 기한·기한 지남 판정을 만들지 않고 ‘최근 변경’을 표시. 담당자 목록도 기한순이 아니라 수정 시각 기준 |
+| 8.5: 페이지네이션 | 실제 목록은 기본 6건·선택 12건. 시안의 5건 기본값과 다름. 다수 페이지에서 최대 표시 개수·첫/끝 이동 등 전체 기준은 후속 점검 |
+| 7.1: 검색·알림 | 현재 헤더 검색은 신청 키워드 조회로 이동. 신청+화면 콤보박스·Ctrl K·알림 패널 전체 패턴은 구현하지 않음 |
+| 7.3 / 8.6: 기관 설정 | 질문·절차·버전·모델·컨텍스트를 실제 경로 링크와 `aria-current`로 탐색. 시안의 문서 양식·점검 기준/알림을 포함한 동일한 5탭 ARIA 패턴은 아님 |
+| 10.2.1: 반환 해소 표현 | 서버의 OPEN/RESOLVED 항목과 영향받은 확인 상태를 사용. UI에 독립된 ‘재작성 필요’·중간 ‘재검토’ 항목 상태 전체를 추가한 것은 아님 |
+| 12장 / SF-01~SF-16 | 코드·자동 회귀 검사는 일부 요구의 근거. 실제 확대·대비·키보드·스크린리더·모달의 종합 수동 판정은 별도 필요 |
+
+## 8. 검증 기록과 판정 경계
+
+이번 프런트 변경에 대해 다음 명령을 실제로 실행했다. 마지막 성공 빌드는 API origin을 `http://127.0.0.1:18080`으로 지정했다.
+
+| 검사 | 관찰 결과 |
+| --- | --- |
+| `npm run format` | 성공 |
+| `npm run check` | 성공: Prettier·TypeScript strict·ESLint·Vitest |
+| `npm run format:check` | 모든 대상 포맷 통과 |
+| `npm run typecheck` | 통과 |
+| `npm run lint` | 경고 0건 조건 통과 |
+| `npm test` | **3개 테스트 파일, 19개 테스트 통과** |
+| `API_ORIGIN=http://127.0.0.1:18080 npm run build` | Next.js 16.4.5 프로덕션 빌드 성공, 정적 페이지 14/14 생성 |
+
+기존 검사에는 API 오류·응답 검증, CSRF, 신원별 메모리 초안, 업로드 제한, AI 미확정 표시 등이 포함된다. 반환 UI를 변경한 첫 실행에서는 기존 버튼 문구·비활성 기대·항목 텍스트와 맞지 않아 3건이 실패했다. 이후 빈 사유·빈 대상의 API 요청 차단과 오류 안내, 지정 단계 반환, 실패 시 입력 보존을 검증하도록 갱신했고, 종결·철회 행동 차단 회귀를 추가해 19건을 통과했다. 테스트를 실행하지 않고 통과 수치를 기입한 것이 아니다.
+
+**브라우저 시각·접근성 검증은 이 작업 환경에서 완료하지 못했다.** Chromium 실행이 환경의 소켓 제한으로 막혀 실제 화면 크기·색 대비·키보드·스크린리더·200% 글자·400% 브라우저 확대 결과를 통과로 기록하지 않는다. CI 브라우저 smoke를 준비·실행하는 것과 그 결과가 성공으로 확인된 것은 별개다. CI 결과가 나올 때 별도 검증 문서에 실행 환경·URL·viewport·관찰 결과를 추가한다.
+
+실제 Spring Boot·PostgreSQL HTTP 시나리오와 도메인·기관 격리 검사는 통합 검증 문서에서 관리한다. 이 문서의 프런트 19개 통과 수치에 백엔드 검사나 미실행 브라우저 검사를 합산하지 않는다.

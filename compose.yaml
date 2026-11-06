@@ -1,0 +1,91 @@
+name: securityadvisor
+services:
+  db:
+    image: pgvector/pgvector:0.8.0-pg17@sha256:40b404964359299eefdd5f8518facf1886c562848cf4de13b6eaf91cb70c2b87
+    environment:
+      POSTGRES_DB: securityadvisor
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${SECURITYADVISOR_DB_BOOTSTRAP_PASSWORD:?Run python3 scripts/init-demo.py}
+      SECURITYADVISOR_MIGRATION_PASSWORD: ${SECURITYADVISOR_MIGRATION_PASSWORD:?Run python3 scripts/init-demo.py}
+      SECURITYADVISOR_DB_PASSWORD: ${SECURITYADVISOR_DB_PASSWORD:?Run python3 scripts/init-demo.py}
+    ports:
+      - "127.0.0.1:${SECURITYADVISOR_DB_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/db/01-app-role.sh:/docker-entrypoint-initdb.d/01-app-role.sh:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d securityadvisor"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+  backend:
+    profiles: [app]
+    build: ./backend
+    hostname: api.securityadvisor
+    networks:
+      default:
+        aliases: [api.securityadvisor]
+    environment:
+      SPRING_PROFILES_ACTIVE: local
+      SECURITYADVISOR_BIND_ADDRESS: 0.0.0.0
+      SECURITYADVISOR_DB_URL: jdbc:postgresql://db:5432/securityadvisor
+      SECURITYADVISOR_DB_USER: securityadvisor_app
+      SECURITYADVISOR_DB_PASSWORD: ${SECURITYADVISOR_DB_PASSWORD:?Run python3 scripts/init-demo.py}
+      SECURITYADVISOR_MIGRATION_USER: securityadvisor_migrator
+      SECURITYADVISOR_MIGRATION_PASSWORD: ${SECURITYADVISOR_MIGRATION_PASSWORD:?Run python3 scripts/init-demo.py}
+      SECURITYADVISOR_CONTEXT_KEY: ${SECURITYADVISOR_CONTEXT_KEY:?Run python3 scripts/init-demo.py}
+      SECURITYADVISOR_DEMO_ENABLED: ${SECURITYADVISOR_DEMO_ENABLED:-true}
+      SECURITYADVISOR_DEMO_SCENARIOS: ${SECURITYADVISOR_DEMO_SCENARIOS:-true}
+      SECURITYADVISOR_DEMO_APPLICANT_PASSWORD: ${SECURITYADVISOR_DEMO_APPLICANT_PASSWORD:?Run python3 scripts/init-demo.py}
+      SECURITYADVISOR_DEMO_SECURITY_PASSWORD: ${SECURITYADVISOR_DEMO_SECURITY_PASSWORD:?Run python3 scripts/init-demo.py}
+      SECURITYADVISOR_DEMO_INFRA_PASSWORD: ${SECURITYADVISOR_DEMO_INFRA_PASSWORD:?Run python3 scripts/init-demo.py}
+      SECURITYADVISOR_DEMO_ADMIN_PASSWORD: ${SECURITYADVISOR_DEMO_ADMIN_PASSWORD:?Run python3 scripts/init-demo.py}
+      SECURITYADVISOR_OPENAI_API_KEY: ${SECURITYADVISOR_OPENAI_API_KEY:-}
+      SECURITYADVISOR_OPENAI_COMPATIBLE_API_KEY: ${SECURITYADVISOR_OPENAI_COMPATIBLE_API_KEY:-}
+      SECURITYADVISOR_ALLOWED_LLM_ENDPOINTS: ${SECURITYADVISOR_ALLOWED_LLM_ENDPOINTS:-https://api.openai.com/v1/chat/completions}
+      SECURITYADVISOR_UPLOAD_DIRECTORY: /var/lib/securityadvisor/uploads
+    ports:
+      - "127.0.0.1:${SECURITYADVISOR_API_PORT:-8080}:8080"
+    volumes:
+      - uploaded_documents:/var/lib/securityadvisor/uploads
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "--silent", "http://localhost:8080/api/health"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 45s
+    security_opt: [no-new-privileges:true]
+  frontend:
+    profiles: [app]
+    hostname: securityadvisor
+    networks:
+      default:
+        aliases: [securityadvisor]
+    build:
+      context: ./frontend
+      args:
+        API_ORIGIN: http://api.securityadvisor:8080
+    environment:
+      NODE_ENV: production
+      API_ORIGIN: http://api.securityadvisor:8080
+    ports:
+      - "127.0.0.1:${SECURITYADVISOR_WEB_PORT:-3000}:3000"
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/api/health').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 15s
+    security_opt: [no-new-privileges:true]
+volumes:
+  postgres_data:
+    name: ${SECURITYADVISOR_DB_VOLUME:-securityadvisor_postgres_data}
+  uploaded_documents:
+    name: ${SECURITYADVISOR_UPLOAD_VOLUME:-securityadvisor_uploaded_documents}
+

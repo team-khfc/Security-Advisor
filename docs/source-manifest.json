@@ -1,0 +1,54 @@
+{
+  "prototype_source_commit": "3900181bc85440780b199266a75f1b789f76f2d0",
+  "requirements_date": "2026-11-06",
+  "requirements": [
+    {
+      "source_file": "02-AGENTS.md",
+      "source_sha256": "370d8ea471bb76c039393bcfc1dfdd79c3a8f8a7bb5edf5050f5926b7bd1d10a",
+      "project_file": "AGENTS.md",
+      "public_copy": "개인 연락처·실명은 역할명으로 치환, 비공개 첨부 링크는 공개 출처로 대체"
+    },
+    {
+      "source_file": "03-CODING_STYLE.md",
+      "source_sha256": "56ec1c6b1a5611f3b686981522e63924c587c4a0bf27fa8e1ac3d827c6b753dc",
+      "project_file": "CODING_STYLE.md",
+      "public_copy": "개인 연락처·실명은 역할명으로 치환, 비공개 첨부 링크는 공개 출처로 대체"
+    },
+    {
+      "source_file": "04-CONTRIBUTING.md",
+      "source_sha256": "9652edfe3d51b9acbd161a5c5137fd511d00a8b7a8ff17f39f2ecc1c9750e175",
+      "project_file": "CONTRIBUTING.md",
+      "public_copy": "개인 연락처·실명은 역할명으로 치환, 비공개 첨부 링크는 공개 출처로 대체"
+    },
+    {
+      "source_file": "05-FUNCTIONAL_SPEC.md",
+      "source_sha256": "5792f2cdfc466ae7e4593090075c897c5fe656176694b4a37ce4c79d343b514d",
+      "project_file": "claude/FUNCTIONAL_SPEC.md",
+      "public_copy": "개인 연락처·실명은 역할명으로 치환, 비공개 첨부 링크는 공개 출처로 대체"
+    },
+    {
+      "source_file": "06-PROJECT_CONTEXT.md",
+      "source_sha256": "e90a4e90f75b5b2c20ea7213096c79893ff6774d4033868cd39e021792ee5a4f",
+      "project_file": "claude/PROJECT_CONTEXT.md",
+      "public_copy": "개인 연락처·실명은 역할명으로 치환, 비공개 첨부 링크는 공개 출처로 대체"
+    },
+    {
+      "source_file": "07-PROJECT_RULES.md",
+      "source_sha256": "22a571f4b20534e22afab7d7fac231597d602f2e6cb7626c97c1a3d1c57d84b5",
+      "project_file": "claude/PROJECT_RULES.md",
+      "public_copy": "개인 연락처·실명은 역할명으로 치환, 비공개 첨부 링크는 공개 출처로 대체"
+    },
+    {
+      "source_file": "08-SECURE_CODING.md",
+      "source_sha256": "9eb1038e5cc43001f423a643f8d89777c74661377563832e7e98a86cbc155136",
+      "project_file": "claude/SECURE_CODING.md",
+      "public_copy": "개인 연락처·실명은 역할명으로 치환, 비공개 첨부 링크는 공개 출처로 대체"
+    },
+    {
+      "source_file": "09-design.md",
+      "source_sha256": "5dbc2fbb05decc7e9a98523b3f103e2b21d78d6191bbe6826fcce678afc802c1",
+      "project_file": "design.md",
+      "public_copy": "개인 연락처·실명은 역할명으로 치환, 비공개 첨부 링크는 공개 출처로 대체"
+    }
+  ]
+}

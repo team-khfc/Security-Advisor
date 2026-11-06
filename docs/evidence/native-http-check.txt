@@ -1,0 +1,12 @@
+PASS 세션 로그인·CSRF·역할 경계
+PASS 2→1 반환: 답변·할당·통신 보존, 지정 항목 재확인
+PASS 3→1·3→2 반환: 영향받은 확인만 재검토, 재협의 후 3단계 복귀
+PASS 4→3 반환·재제출: 첫 제출본 불변, 새 차수와 최종 AI 확인 보존
+PASS FIREWALL 4단계·기관 격리·INFRA 선행·보완·미확정 AI 차단·멱등 제출·양측 최종 검토
+PASS SECURITY_REVIEW 4단계·기관 격리·INFRA 선행·보완·미확정 AI 차단·멱등 제출·양측 최종 검토
+PASS 종결·철회 사유 필수·값 보존·종료 후 변경 거절
+PASS 고정 INFRA 순서·기관 설정 멱등 게시·기존 신청 정책 버전 보존
+PASS 기관 컨텍스트 권한·DB 모델 설정 이력·실제 pgvector 요약 검색
+PASS 로그아웃 후 세션 폐기
+{"groups": 10, "passed": ["세션 로그인·CSRF·역할 경계", "2→1 반환: 답변·할당·통신 보존, 지정 항목 재확인", "3→1·3→2 반환: 영향받은 확인만 재검토, 재협의 후 3단계 복귀", "4→3 반환·재제출: 첫 제출본 불변, 새 차수와 최종 AI 확인 보존", "FIREWALL 4단계·기관 격리·INFRA 선행·보완·미확정 AI 차단·멱등 제출·양측 최종 검토", "SECURITY_REVIEW 4단계·기관 격리·INFRA 선행·보완·미확정 AI 차단·멱등 제출·양측 최종 검토", "종결·철회 사유 필수·값 보존·종료 후 변경 거절", "고정 INFRA 순서·기관 설정 멱등 게시·기존 신청 정책 버전 보존", "기관 컨텍스트 권한·DB 모델 설정 이력·실제 pgvector 요약 검색", "로그아웃 후 세션 폐기"]}
+PASS Java JAR + production Next + PostgreSQL17/pgvector; runtime DDL denied; restart preserved records.

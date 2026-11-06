@@ -1,0 +1,36 @@
+{
+  "name": "securityadvisor-frontend",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --hostname 127.0.0.1",
+    "build": "next build",
+    "start": "next start --hostname 127.0.0.1",
+    "typecheck": "tsc --noEmit",
+    "format": "prettier --write app components features lib styles verification *.ts *.mjs *.json",
+    "format:check": "prettier --check app components features lib styles verification *.ts *.mjs *.json",
+    "test": "vitest run",
+    "lint": "eslint . --max-warnings 0",
+    "check": "npm run format:check && npm run typecheck && npm run lint && npm test"
+  },
+  "dependencies": {
+    "@tanstack/react-query": "5.106.1",
+    "next": "16.4.5",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "zod": "4.6.7"
+  },
+  "devDependencies": {
+    "@testing-library/react": "16.3.3",
+    "@testing-library/user-event": "14.6.8",
+    "@types/node": "24.10.1",
+    "@types/react": "19.2.6",
+    "@types/react-dom": "19.2.3",
+    "eslint": "9.39.1",
+    "eslint-config-next": "16.4.5",
+    "jsdom": "31.0.0",
+    "prettier": "3.7.4",
+    "typescript": "5.9.3",
+    "vitest": "5.1.0"
+  }
+}

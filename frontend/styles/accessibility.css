@@ -1,0 +1,217 @@
+/* design v3.1: 실효 글자 크기와 상태·초점·다크 모드의 공통 수용 조건. */
+html[data-scale='1.125'] {
+  font-size: 70.3125%;
+}
+html[data-scale='1.25'] {
+  font-size: 78.125%;
+}
+.app-shell {
+  min-height: calc(100dvh - 88px);
+}
+.app-dialog {
+  position: relative;
+  background: var(--sf-surface);
+  box-shadow: var(--sf-shadow-dialog);
+}
+.app-dialog::backdrop {
+  background: var(--sf-overlay);
+}
+.dialog-heading {
+  padding-right: 48px;
+}
+.modal-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+}
+.display-options {
+  margin-top: 24px;
+}
+.display-options .check-label {
+  min-height: 44px;
+}
+.demo-strip {
+  background: var(--sf-secondary-fill);
+  color: var(--sf-on-secondary);
+}
+.skip-link {
+  background: var(--sf-secondary-fill);
+  color: var(--sf-on-secondary);
+}
+.button.primary {
+  color: var(--sf-on-primary);
+  font-weight: 700;
+}
+.button.danger {
+  background: var(--sf-danger-soft);
+  border-color: var(--sf-danger);
+  color: var(--sf-danger);
+}
+.sf-badge {
+  font-size: 1.5rem;
+}
+.sf-field label,
+.network-table td,
+.interview-bubble,
+.sf-table tbody td,
+.workflow-rule,
+.terminal-notice p,
+.return-notice p,
+.return-notice li,
+.header-search input {
+  font-size: 1.7rem;
+}
+.field-error,
+.field-hint,
+.role-caption,
+.source-meta,
+.sf-stepper li,
+.save-status,
+.interview-header p,
+.document-choice small {
+  font-size: 1.5rem;
+}
+.sidebar nav a,
+.account-name,
+.header-tools .role-picker {
+  font-size: 1.6rem;
+}
+.return-notice a {
+  color: var(--sf-warning-text);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  font-weight: 700;
+}
+.returned-field {
+  border-left: 4px solid var(--sf-warning);
+  background: var(--sf-warning-soft);
+  scroll-margin-top: 24px;
+}
+.returned-reason,
+.returned-field .source-meta {
+  color: var(--sf-text);
+}
+.previous-value {
+  margin: 12px 0;
+  border: 1px solid var(--sf-border-strong);
+  border-radius: var(--r-ctl);
+  padding: 12px;
+}
+.previous-value summary {
+  min-height: 32px;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.previous-value p {
+  margin-top: 8px;
+}
+.sf-stepper li {
+  flex-wrap: wrap;
+}
+.sf-stepper .sf-badge {
+  margin-left: auto;
+}
+.stage-bars.terminal i.on {
+  background: var(--sf-border-strong);
+}
+.sidebar-collapse {
+  min-width: 44px;
+  min-height: 44px;
+  top: 6px;
+  right: 10px;
+}
+.header-search button {
+  min-width: 44px;
+  min-height: 44px;
+}
+.terminal-notice {
+  background: var(--sf-background);
+}
+@media (max-width: 1023px) {
+  .app-shell {
+    min-height: calc(100dvh - 80px);
+  }
+  .sidebar.open {
+    top: 80px;
+  }
+  .screen-setting {
+    display: inline-flex;
+  }
+  main {
+    padding: 32px 24px 48px;
+  }
+}
+@media (max-width: 767px) {
+  main {
+    padding: 24px 16px 40px;
+  }
+  .sf-heading h1 {
+    font-size: 2.4rem;
+  }
+  .sf-stepper {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .sf-stepper li {
+    font-size: 1.5rem;
+  }
+  .sf-notice,
+  .filter-button,
+  .pill,
+  .status-pill {
+    font-size: 1.6rem;
+  }
+  .demo-strip,
+  .demo-strip > a {
+    font-size: 1.5rem;
+  }
+  .header-inner {
+    flex-wrap: wrap;
+  }
+  .header-org {
+    display: block;
+    order: 5;
+    flex-basis: 100%;
+    border-left: 0;
+    padding-left: 0;
+    font-size: 1.5rem;
+  }
+  .header-tools .account-name {
+    display: inline;
+    font-size: 1.5rem;
+  }
+  .brand strong {
+    font-size: 1.8rem;
+  }
+  .brand small {
+    font-size: 1.3rem;
+  }
+  .app-dialog {
+    padding: 20px;
+  }
+  .dialog-actions {
+    flex-wrap: wrap;
+  }
+  .dialog-actions .button {
+    flex: 1;
+  }
+  .sidebar.open {
+    position: absolute;
+    top: 0;
+    bottom: auto;
+    min-height: 100%;
+    max-width: 100%;
+  }
+}
+@media (pointer: coarse) {
+  .button,
+  .btn-sm,
+  .icon-button,
+  .pagination button,
+  .pill,
+  .status-pill,
+  .text-button {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}

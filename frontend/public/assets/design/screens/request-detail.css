@@ -1,0 +1,38 @@
+/* 보안길잡이 AI | 신청 상세·담당자 검토 화면 전용 */
+.back{display:inline-flex;align-items:center;gap:.4rem;min-height:4.4rem;margin-bottom:.8rem;font-size:1.5rem}
+.stepper{list-style:none;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.8rem;padding:0;margin:0 0 3.2rem}
+.stepper li{border-top:4px solid var(--sf-border);padding-top:1.2rem;font-size:1.5rem;color:var(--sf-muted)}
+.stepper li .n{display:block;font-size:1.3rem}
+.stepper li.done{color:var(--sf-text)}
+.stepper li[aria-current="step"]{color:var(--sf-text);font-weight:700}
+.stepper li:nth-child(1):is(.done,[aria-current="step"]){border-color:var(--st1)}
+.stepper li:nth-child(2):is(.done,[aria-current="step"]){border-color:var(--st2)}
+.stepper li:nth-child(3):is(.done,[aria-current="step"]){border-color:var(--st3)}
+.stepper li:nth-child(4):is(.done,[aria-current="step"]){border-color:var(--st4)}
+.detail{display:grid;grid-template-columns:minmax(0,1fr) minmax(34rem,40rem);gap:3.2rem;align-items:start}
+.review{position:sticky;top:2.4rem}
+.review .card{border-color:var(--sf-primary)}
+.chk-list{list-style:none;margin:0;padding:0}
+.chk-list li{display:flex;gap:1rem;padding:.8rem 0;border-bottom:1px solid var(--sf-line);font-size:1.6rem}
+.hist{list-style:none;margin:0;padding:0}
+.hist li{display:grid;grid-template-columns:16rem minmax(0,1fr);gap:1.6rem;padding:1rem 0;border-bottom:1px solid var(--sf-line);font-size:1.5rem}
+.hist time{color:var(--sf-muted)}
+.inner-tbl{min-width:72rem}
+.inner-tbl td{padding:1.2rem 1.2rem;font-size:1.5rem}
+.inner-tbl thead th{padding:1.2rem}
+.crumb{display:flex;gap:.8rem;align-items:center;font-size:1.5rem;margin-bottom:1.2rem;color:var(--sf-muted)}
+.crumb a{min-height:4.4rem;display:inline-flex;align-items:center}
+.consult{display:grid;grid-template-columns:1fr 1fr;gap:.8rem;margin-bottom:2rem}
+.consult div{border:1px solid var(--sf-line);border-radius:var(--r-ctl);padding:1rem 1.2rem;display:flex;flex-direction:column;gap:.4rem;font-size:1.5rem;align-items:flex-start}
+.memo{border-bottom:1px solid var(--sf-line);padding:.8rem 0}
+@media (max-width:767px){
+  .consult{grid-template-columns:1fr}
+}
+@media (max-width:1279px){
+  .detail{grid-template-columns:1fr}
+  .review{position:static}
+}
+@media (max-width:767px){
+  .hist li{grid-template-columns:1fr;gap:.2rem}
+  .stepper li{font-size:1.3rem}
+}

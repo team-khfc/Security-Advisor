@@ -1,0 +1,60 @@
+server:
+  port: ${SECURITYADVISOR_API_PORT:${PORT:8080}}
+  error:
+    include-message: never
+    include-stacktrace: never
+    include-binding-errors: never
+  servlet:
+    session:
+      timeout: 20m
+      cookie:
+        name: SECURITYADVISOR_SESSION
+        http-only: true
+        secure: true
+        same-site: strict
+spring:
+  application:
+    name: securityadvisor-backend
+  jackson:
+    deserialization:
+      fail-on-null-for-primitives: true
+  datasource:
+    url: ${SECURITYADVISOR_DB_URL:${BOAN_DB_URL:jdbc:postgresql://localhost:5432/securityadvisor}}
+    username: ${SECURITYADVISOR_DB_USER:${BOAN_DB_USER:securityadvisor_app}}
+    password: ${SECURITYADVISOR_DB_PASSWORD:${BOAN_DB_PASSWORD}}
+  flyway:
+    user: ${SECURITYADVISOR_MIGRATION_USER:${BOAN_MIGRATION_USER:securityadvisor_migrator}}
+    password: ${SECURITYADVISOR_MIGRATION_PASSWORD:${BOAN_MIGRATION_PASSWORD}}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+  servlet:
+    multipart:
+      max-file-size: 1MB
+      max-request-size: 2MB
+  mvc:
+    problemdetails:
+      enabled: true
+securityadvisor:
+  demo:
+    enabled: ${SECURITYADVISOR_DEMO_ENABLED:${BOAN_DEMO_ENABLED:false}}
+    scenarios: ${SECURITYADVISOR_DEMO_SCENARIOS:${BOAN_DEMO_SCENARIOS:false}}
+  context-key: ${SECURITYADVISOR_CONTEXT_KEY:${BOAN_CONTEXT_KEY}}
+  upload-directory: ${SECURITYADVISOR_UPLOAD_DIRECTORY:${BOAN_UPLOAD_DIRECTORY:/var/lib/securityadvisor/uploads}}
+  allowed-llm-endpoints: ${SECURITYADVISOR_ALLOWED_LLM_ENDPOINTS:${BOAN_ALLOWED_LLM_ENDPOINTS:https://api.openai.com/v1/chat/completions}}
+logging:
+  level:
+    org.hibernate.SQL: OFF
+    org.hibernate.orm.jdbc.bind: OFF
+    org.springframework.security: WARN
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    supported-submit-methods: []
+    disable-swagger-default-url: true
+

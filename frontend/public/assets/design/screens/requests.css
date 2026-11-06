@@ -1,0 +1,35 @@
+/* 보안길잡이 AI | 신청 현황(대시보드) 화면 전용 */
+.tasks{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:2.4rem}
+.task{border:1px solid var(--sf-border);border-radius:var(--r-card);background:var(--sf-surface);padding:2.4rem;display:flex;flex-direction:column;gap:.8rem;min-width:0}
+.task-top{display:flex;justify-content:space-between;align-items:center;gap:1.2rem;margin-bottom:.8rem}
+.task-top .id{font-size:1.5rem;color:var(--sf-muted)}
+.task h3{font-size:1.9rem;margin:0}
+.task-foot{display:flex;justify-content:space-between;align-items:center;gap:1.2rem;flex-wrap:wrap;margin-top:1.6rem}
+.when{display:flex;gap:.6rem;align-items:center;font-size:1.5rem;color:var(--sf-muted)}
+.prog-l{font-size:1.5rem;margin-bottom:.6rem;white-space:nowrap}
+.bars{display:flex;gap:.4rem}
+.bars i{width:2.4rem;height:.4rem;border-radius:2px;background:var(--sf-border)}
+.bars i.on:nth-child(1){background:var(--st1)}
+.bars i.on:nth-child(2){background:var(--st2)}
+.bars i.on:nth-child(3){background:var(--st3)}
+.bars i.on:nth-child(4){background:var(--st4)}
+.st-legend{list-style:none;margin:0;padding:0;display:flex;gap:.4rem 1.6rem;flex-wrap:wrap;font-size:1.4rem;color:var(--sf-muted)}
+.st-legend li{display:flex;align-items:center;gap:.6rem}
+.st-legend i{width:1.8rem;height:.6rem;border-radius:2px}
+.dfilter{display:flex;align-items:center;gap:.8rem 1.2rem;flex-wrap:wrap}
+.dfilter .per{display:flex;align-items:center;gap:.8rem}
+.dfilter .per label,.pdates label{font-size:1.5rem;color:var(--sf-muted);white-space:nowrap}
+.dfilter select.input{min-height:4.8rem;padding-right:3.2rem}
+.pdates{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap}
+.pdates[hidden]{display:none}
+.pdates input.input{min-height:4.8rem;font-size:1.5rem;width:16.8rem}
+.pf-help{margin:-.4rem 0 .8rem;text-align:right}
+#pf-e{text-align:right;margin:-.4rem 0 1.2rem}
+@media (max-width:767px){
+  .dfilter{width:100%}
+  .pf-help,#pf-e{text-align:left}
+  .pdates input.input{width:auto;flex:1}
+}
+@media (max-width:1023px){
+  .tasks{grid-template-columns:1fr}
+}

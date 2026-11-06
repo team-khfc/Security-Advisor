@@ -1,0 +1,22 @@
+name: 오류 보고
+description: 합성 자료로 재현하는 오류 보고
+title: '[오류] '
+body:
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: 재현 절차
+      description: 브라우저·OS·앱 버전, 역할, 문서 종류와 단계를 적어 주세요. 비밀값은 제외하세요.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: 예상 결과와 실제 결과
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: 합성 자료와 오류 코드
+      description: 개인정보·내부망 IP·API 키·세션 쿠키가 없는 증거만 첨부하세요.

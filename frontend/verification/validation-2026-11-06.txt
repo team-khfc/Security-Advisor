@@ -1,0 +1,53 @@
+SecurityAdvisor frontend validation record
+Workspace: /workspace/scratch/7a33b6587b12/Security-Advisor/frontend
+Scope: design.md v3.1 implementation update
+Evidence type: Summary of tool-executed commands and their observed output; not a raw shell capture.
+
+Dependencies
+- Independently copied node_modules from the previous local project snapshot.
+- No changes were made to the original snapshot.
+- Next.js build reported version 16.4.5 (Turbopack).
+
+Executed commands, in order
+1. npm run format && npm run check
+   - Prettier formatting: passed.
+   - TypeScript tsc --noEmit: passed.
+   - ESLint --max-warnings 0: passed.
+   - Vitest: 3 files; 15 passed, 3 failed.
+   - Failures were old return-action button names, disabled-button expectations, and plain text item expectations after v3.1 changed these to stage-specific action labels, submit-time validation, and links.
+2. Updated the existing return tests to verify missing reason and missing target make no API call and show an error; retained successful transition and failed-request input-preservation checks. Added closed/withdrawn action suppression regression.
+3. npm run format && npm run check && API_ORIGIN=http://127.0.0.1:18080 npm run build
+   Exit code: 0.
+   - Prettier: All matched files use Prettier code style.
+   - TypeScript: passed.
+   - ESLint: passed with max-warnings 0.
+   - Vitest 5.1.0: Test Files 3 passed (3); Tests 19 passed (19).
+   - Test duration: 1.64 seconds.
+   - Next build: Compiled successfully in 2.7 seconds.
+   - Build TypeScript finished in 4.6 seconds.
+   - Static generation: 14/14 pages in 321 milliseconds.
+   - Build API target: http://127.0.0.1:18080.
+
+Generated routes
+/; /_not-found; /admin/[tab]; /components; /design-preview/[screen];
+/documents; /history; /institution/context; /knowledge; /login; /network;
+/requests; /requests/[id]/[step]; /requests/new; /supplements; /workspace.
+
+Material implementation updates
+- SecurityAdvisor brand and dynamic screen titles.
+- No prototype banner in authenticated task flows; explicit read-only synthetic fixture banner in design preview.
+- 17px base body, no main zoom, local Pretendard GOV regular/bold files, 1920px max shell.
+- KRDS semantic token mapping, dark theme support, persisted non-sensitive font/theme preferences.
+- Allocation completion uses blue; consultation completion remains separate green.
+- Four business stages and current-stage return badge.
+- Return reason/target validation, affected-item links, field marking, preserved values, previousValue comparison from server return snapshots.
+- Closed/withdrawn state hides workflow actions even if a stale action list is present; terminal reason and event information remain visible.
+- Fixed INFRA-first workflow retained; no manager role or parallel policy was added.
+- Modal close button is last in DOM; native dialog focus model retained.
+
+Limits
+- This record does not claim a browser visual/accessibility pass.
+- No screen-reader, contrast measurement, 200% font or 400% browser zoom verification was performed by this frontend worker.
+- Root owns real-server HTTP integration and browser smoke orchestration.
+- Runtime browser checks in this workspace were reported blocked by the root agent; CI browser verification is separate.
+- The frontend README was updated after the successful build; no production source change followed that build at the time this record was written.

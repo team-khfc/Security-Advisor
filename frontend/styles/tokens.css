@@ -1,0 +1,56 @@
+/* KRDS 원본 토큰과 v3.1의 의미 토큰을 연결한다. 어두운 모드는 design/tokens.css를 따른다. */
+:root {
+  --sf-primary: var(--krds-color-light-primary-50);
+  --sf-primary-hover: var(--krds-color-light-primary-60);
+  --sf-primary-text: var(--krds-color-light-primary-60);
+  --sf-primary-soft: var(--krds-color-light-primary-5);
+  --sf-on-primary: var(--krds-color-light-gray-0);
+  --sf-secondary-fill: var(--krds-color-light-secondary-70);
+  --sf-on-secondary: var(--krds-color-light-gray-0);
+  --sf-text: var(--krds-color-light-gray-90);
+  --sf-muted: var(--krds-color-light-gray-70);
+  --sf-surface: var(--krds-color-light-gray-0);
+  --sf-background: var(--krds-color-light-gray-5);
+  --sf-border: var(--krds-color-light-gray-20);
+  --sf-border-strong: var(--krds-color-light-gray-50);
+  --sf-line: var(--krds-color-light-gray-10);
+  --sf-focus: var(--krds-color-light-primary-60);
+  --sf-danger-text: var(--krds-color-light-danger-60);
+  --sf-danger-soft: var(--krds-color-light-danger-5);
+  --sf-warning-soft: var(--krds-color-light-warning-5);
+  --sf-control-border: var(--sf-border-strong);
+  --sf-secondary: var(--sf-secondary-fill);
+  --sf-primary-pressed: var(--sf-primary-hover);
+  --sf-danger: var(--sf-danger-text);
+  --sf-warning: var(--sf-warning-text);
+  --sf-success: var(--sf-success-text);
+  --sf-radius: var(--r-card);
+  --sf-shadow-dialog: 0 8px 24px rgba(0, 0, 0, 0.2);
+  --sf-shadow-pop: 0 8px 24px rgba(0, 0, 0, 0.18);
+  --sf-overlay: rgba(17, 20, 23, 0.5);
+  --work-h: clamp(60rem, calc(100dvh - 30rem), 120rem);
+}
+
+/* :root 별칭보다 높은 우선순위로 운영체제의 어두운 모드 토큰을 유지한다. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --sf-primary: #5a92f7;
+    --sf-primary-hover: #86affa;
+    --sf-primary-text: #9bbefb;
+    --sf-primary-soft: #16274a;
+    --sf-on-primary: #0a1530;
+    --sf-secondary-fill: #c9dbfc;
+    --sf-on-secondary: #0a1530;
+    --sf-text: #e6e8ea;
+    --sf-muted: #b1b8be;
+    --sf-surface: #1b1f23;
+    --sf-background: #131619;
+    --sf-border: #3a4148;
+    --sf-border-strong: #8a949e;
+    --sf-line: #2a3036;
+    --sf-focus: #9bbefb;
+    --sf-danger-text: #ff907a;
+    --sf-danger-soft: #3a1a14;
+    --sf-warning-soft: #33280b;
+  }
+}

@@ -1,0 +1,110 @@
+name: Team checks
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: checks-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend:
+    name: Java 25 · format · unit · architecture · PostgreSQL integration
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@77dd5b2ce225ea11469928ac317850245a74ae78 # v6.2.0
+        with:
+          distribution: temurin
+          java-version: '25'
+          cache: gradle
+          cache-dependency-path: |
+            backend/*.gradle.kts
+            backend/gradle/wrapper/gradle-wrapper.properties
+      - name: Require Docker for Testcontainers
+        run: docker info --format '{{.ServerVersion}}'
+      - name: Verify and build backend
+        working-directory: backend
+        run: |
+          chmod +x gradlew
+          ./gradlew --no-daemon spotlessCheck check bootJar
+
+  frontend:
+    name: TypeScript · formatting · lint · unit · production build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Install locked dependencies
+        working-directory: frontend
+        run: npm ci
+      - name: Check frontend
+        working-directory: frontend
+        run: npm run check
+      - name: Build production frontend
+        working-directory: frontend
+        env:
+          NEXT_TELEMETRY_DISABLED: '1'
+        run: npm run build
+
+  compose:
+    name: Clean Compose startup · HTTP · Chromium
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - name: Generate isolated synthetic environment
+        run: |
+          python3 scripts/init-demo.py
+          python3 -m py_compile scripts/*.py
+          sh -n scripts/db/01-app-role.sh
+          docker compose --profile app config --quiet
+      - name: Build and wait for all services
+        run: docker compose --profile app up --build --detach --wait --wait-timeout 300
+      - name: Exercise both document workflows through Next.js
+        run: python3 scripts/smoke.py
+      - name: Install pinned browser test runtime
+        run: |
+          npm install --prefix "$RUNNER_TEMP/securityadvisor-browser" --no-save playwright@1.62.1
+          node "$RUNNER_TEMP/securityadvisor-browser/node_modules/playwright/cli.js" install --with-deps chromium
+      - name: Exercise synthetic screens in Chromium
+        run: SECURITYADVISOR_PLAYWRIGHT_MODULE="$RUNNER_TEMP/securityadvisor-browser/node_modules/playwright/index.mjs" node scripts/browser-smoke.mjs
+      - name: Collect synthetic screenshots and result summary
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: synthetic-browser-checks
+          path: |
+            .artifacts/browser/*.png
+            .artifacts/browser/results.json
+          include-hidden-files: true
+          if-no-files-found: warn
+          retention-days: 7
+      - name: Show service status
+        if: always()
+        run: docker compose --profile app ps --all
+      - name: Remove ephemeral CI services and data
+        if: always()
+        run: docker compose --profile app down --volumes --remove-orphans

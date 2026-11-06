@@ -1,0 +1,17 @@
+{
+  "verified_at_utc": "2026-11-06T15:29:39.867126+00:00",
+  "java": "25",
+  "postgresql": "17.11",
+  "pgvector": "0.8.0",
+  "frontend": "Next.js production server",
+  "http_scenario_groups_passed": 10,
+  "openapi_paths": 35,
+  "runtime_database_ddl_denied": true,
+  "backend_restart_preserved_request_count": true,
+  "openapi_server_url_normalized_to_same_origin": true,
+  "docker_executed_locally": false,
+  "testcontainers_executed_locally": false,
+  "browser_executed_locally": false,
+  "browser_local_blocker": "Chromium Unix socket denied; escalation rejected by sandbox approval policy",
+  "external_llm_live_calls": false
+}

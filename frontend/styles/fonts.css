@@ -1,0 +1,15 @@
+/* 색상·공통 반경을 이 파일에서 수정하세요. KRDS 원본 파일은 보존합니다. */
+@font-face {
+  font-family: 'Pretendard GOV';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/assets/vendor/krds/fonts/PretendardGOV-Regular.subset.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Pretendard GOV';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/assets/vendor/krds/fonts/PretendardGOV-Bold.subset.woff2') format('woff2');
+}

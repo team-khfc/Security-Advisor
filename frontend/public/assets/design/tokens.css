@@ -1,0 +1,36 @@
+/* 보안길잡이 AI | 디자인 토큰: 색, 단계 색, 둥글기, 작업 영역 높이. 라이트·다크 모드 값을 여기서만 바꿉니다. */
+:root{
+  --sf-primary:#256EF4; --sf-primary-hover:#0B50D0; --sf-primary-text:#0B50D0; --sf-primary-soft:#ECF2FE;
+  --sf-on-primary:#FFFFFF; --sf-secondary-fill:#063A74; --sf-on-secondary:#FFFFFF;
+  --sf-text:#1E2124; --sf-muted:#464C53; --sf-surface:#FFFFFF; --sf-background:#F4F5F6;
+  --sf-border:#CDD1D5; --sf-border-strong:#6D7882; --sf-line:#E6E8EA; --sf-focus:#0B50D0;
+  --sf-danger-text:#BD2C0F; --sf-danger-soft:#FDEFEC; --sf-warning-text:#8A5C00; --sf-warning-soft:#FFF3DB;
+  --sf-success-text:#267337; --sf-success-soft:#EAF6EC;
+  --st1:#256EF4; --st2:#7B4BD8; --st3:#C96A00; --st4:#1F8A4C;
+  --r-sm:4px; --r-ctl:6px; --r-card:10px; --r-panel:12px;
+  --work-h:clamp(60rem, calc(100dvh / .9 - 30rem), 120rem);
+  color-scheme:light; box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --sf-primary:#5A92F7; --sf-primary-hover:#86AFFA; --sf-primary-text:#9BBEFB; --sf-primary-soft:#16274A;
+    --sf-on-primary:#0A1530; --sf-secondary-fill:#C9DBFC; --sf-on-secondary:#0A1530;
+    --sf-text:#E6E8EA; --sf-muted:#B1B8BE; --sf-surface:#1B1F23; --sf-background:#131619;
+    --sf-border:#3A4148; --sf-border-strong:#8A949E; --sf-line:#2A3036; --sf-focus:#9BBEFB;
+    --sf-danger-text:#FF907A; --sf-danger-soft:#3A1A14; --sf-warning-text:#F2C14E; --sf-warning-soft:#33280B;
+    --st1:#6FA0F8; --st2:#A98BF0; --st3:#F2A93B; --st4:#5CC88A;
+    --sf-success-text:#7AD08F; --sf-success-soft:#12301A; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --sf-primary:#5A92F7; --sf-primary-hover:#86AFFA; --sf-primary-text:#9BBEFB; --sf-primary-soft:#16274A;
+  --sf-on-primary:#0A1530; --sf-secondary-fill:#C9DBFC; --sf-on-secondary:#0A1530;
+  --sf-text:#E6E8EA; --sf-muted:#B1B8BE; --sf-surface:#1B1F23; --sf-background:#131619;
+  --sf-border:#3A4148; --sf-border-strong:#8A949E; --sf-line:#2A3036; --sf-focus:#9BBEFB;
+  --sf-danger-text:#FF907A; --sf-danger-soft:#3A1A14; --sf-warning-text:#F2C14E; --sf-warning-soft:#33280B;
+  --st1:#6FA0F8; --st2:#A98BF0; --st3:#F2A93B; --st4:#5CC88A;
+  --sf-success-text:#7AD08F; --sf-success-soft:#12301A; color-scheme:dark;
+}
+:root[data-theme="dark"] .logo-l{display:none}
+:root[data-theme="dark"] .logo-d{display:block}

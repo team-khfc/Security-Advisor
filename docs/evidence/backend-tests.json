@@ -1,0 +1,184 @@
+{
+  "date": "2026-11-06",
+  "evidence_type": "Counts extracted from this workspace JUnit XML; command outcome reported by backend verifier",
+  "command": "gradle --no-daemon spotlessApply check bootJar",
+  "gradle_launcher": "Installed Gradle 9.1.0 binary; repository wrapper execution not verified locally",
+  "java": "25",
+  "spring_boot": "4.1.2",
+  "database": "Fresh disposable PostgreSQL 17.11 with pgvector 0.8.0",
+  "testcontainers_executed": false,
+  "total": 105,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "suites": [
+    {
+      "name": "kr.securityadvisor.AnalysisBoundaryTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "kr.securityadvisor.AnalysisIntegrationTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "kr.securityadvisor.ApiInputIntegrationTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "kr.securityadvisor.ArchitectureTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "kr.securityadvisor.AuthIntegrationTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "kr.securityadvisor.InstitutionIntegrationTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "kr.securityadvisor.LlmConfigurationIntegrationTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "kr.securityadvisor.auth.service.LoginAttemptLimiterTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "kr.securityadvisor.common.HealthControllerTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "kr.securityadvisor.configuration.service.PolicyValidatorTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "kr.securityadvisor.document.service.DocumentRendererTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "kr.securityadvisor.knowledge.service.ContextCipherTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "kr.securityadvisor.knowledge.service.LocalFeatureEmbeddingTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "kr.securityadvisor.knowledge.service.PrivateContextServiceTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "kr.securityadvisor.llm.service.BoundedModelHttpClientTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "kr.securityadvisor.llm.service.CandidateValidatorTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "kr.securityadvisor.llm.service.ModelAdapterProtocolTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "kr.securityadvisor.llm.service.RequestAssistantServiceTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "kr.securityadvisor.llm.service.UploadStorageTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "kr.securityadvisor.request.SecurityRequestIntegrationTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "kr.securityadvisor.request.domain.NetworkPolicyTest",
+      "tests": 21,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "kr.securityadvisor.request.domain.SecurityRequestWorkflowTest",
+      "tests": 11,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "kr.securityadvisor.request.domain.WorkflowRulesTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "kr.securityadvisor.request.service.SecurityRequestServiceTest",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  ]
+}
