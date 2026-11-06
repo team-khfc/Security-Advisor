@@ -73,10 +73,11 @@ async function inspect(page, name, screenshot = true) {
     overflow: document.documentElement.scrollWidth - window.innerWidth,
     headings: document.querySelectorAll("main h1").length,
     title: document.querySelector("main h1")?.textContent,
-    fontLoaded: document.fonts.check("17px PretendardGOV"),
+    fontLoaded: document.fonts.check('17px "Pretendard GOV"', "보안길잡이"),
+    fontFamily: getComputedStyle(document.body).fontFamily,
   }));
   assert(
-    metrics.bodyFontSize >= 16,
+    metrics.bodyFontSize >= 17,
     `${name}: body size ${metrics.bodyFontSize}`,
   );
   assert(
@@ -85,12 +86,75 @@ async function inspect(page, name, screenshot = true) {
   );
   assert.equal(metrics.headings, 1, `${name}: one main heading`);
   assert(
+    metrics.fontLoaded && metrics.fontFamily.includes("Pretendard GOV"),
+    `${name}: local project font`,
+  );
+  assert(
     ["1", "normal"].includes(metrics.zoom),
     `${name}: body zoom ${metrics.zoom}`,
   );
   results.push({ check: name, result: "PASS", ...metrics });
   if (screenshot)
     await page.screenshot({ path: `${output}/${name}.png`, fullPage: true });
+}
+
+async function writeRequest(page, method, endpoint, data) {
+  const csrf = await (await page.request.get("/api/auth/csrf")).json();
+  const response = await page.request.fetch(endpoint, {
+    method,
+    data,
+    headers: { [csrf.headerName]: csrf.token },
+  });
+  assert.equal(
+    response.status(),
+    200,
+    `${method} ${endpoint}: ${response.status()}`,
+  );
+  return response.json();
+}
+
+async function arrangeReturnedRequest(page, created) {
+  const values = {
+    purpose: "공개 안내 자료를 조회하는 합성 서비스",
+    audience: "가상 이용자",
+    dataTypes: "공개 안내 문서",
+    externalTransfer: "NO",
+    period: "2026-11-06부터 2026-12-31까지",
+    dataFlow: "가상 화면에서 공개 자료 조회",
+  };
+  const endpoint = `/api/security-requests/${created.id}`;
+  let current = await writeRequest(page, "PATCH", `${endpoint}/answers`, {
+    expectedRevision: created.revision,
+    answers: created.answers
+      .filter((field) => field.ownerRole === "APPLICANT")
+      .map((field) => ({
+        key: field.key,
+        value: values[field.key] ?? "신청자가 확인한 합성 설명",
+        confirmed: true,
+        notApplicable: false,
+      })),
+  });
+  current = await writeRequest(page, "POST", `${endpoint}/consult`, {
+    expectedRevision: current.revision,
+  });
+  const infra = await account("INFRA");
+  try {
+    current = await writeRequest(infra.page, "POST", `${endpoint}/return`, {
+      expectedRevision: current.revision,
+      targetStage: 1,
+      reason: "브라우저 검증용 사업 목적 보완 요청",
+      fieldKeys: ["purpose"],
+    });
+    assert.equal(current.stage, 1);
+    assert.equal(
+      current.returnItems.find((item) => item.fieldKey === "purpose")
+        .previousValue,
+      values.purpose,
+    );
+    return current;
+  } finally {
+    await infra.context.close();
+  }
 }
 
 try {
@@ -125,12 +189,8 @@ try {
   const requests = await (
     await page.request.get("/api/security-requests")
   ).json();
-  const returned = requests.find(
-    (item) =>
-      item.returnItems.some((entry) => entry.status === "OPEN") &&
-      !["CLOSED", "WITHDRAWN"].includes(item.status),
-  );
-  if (returned) {
+  const returned = await arrangeReturnedRequest(page, created);
+  {
     await page.goto(`/requests/${returned.id}/questions`);
     await page.locator(".return-notice").waitFor();
     assert(
@@ -138,8 +198,6 @@ try {
       "Returned fields retain visible highlighting",
     );
     await inspect(page, "returned-request");
-  } else {
-    throw new Error("Synthetic returned scenario unavailable");
   }
   for (const status of ["CLOSED", "WITHDRAWN"]) {
     const item = requests.find((entry) => entry.status === status);

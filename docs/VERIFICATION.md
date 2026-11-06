@@ -2,6 +2,8 @@
 
 검증일: **2026-11-06**. 대상은 이 SecurityAdvisor 팀 개발 시작 버전입니다. 이전 시제품의 Java·테스트 수·HTTP 경로 수·브라우저 확인 기록은 이번 결과로 재사용하지 않고 제거했습니다.
 
+이 문서는 로컬 검증과 최초 CI의 기록입니다. 이후 커밋의 현재 CI 상태·브라우저 결과는 [PR #2의 검사](https://github.com/team-khfc/Security-Advisor/pull/2/checks)와 [실행 목록](https://github.com/team-khfc/Security-Advisor/actions/workflows/ci.yml)을 확인합니다.
+
 ## 실제 실행 결과
 
 | 검사 | 환경·명령 | 관찰한 결과 |
@@ -35,14 +37,25 @@
 
 초기 smoke의 미완료 최종 검토 확정 요청은 422를 예상했으나 실제 도메인 계약은 409 `FINAL_REVIEWS_REQUIRED`였습니다. 기대값을 상태 충돌 의미에 맞추고 오류 코드·최신 revision도 확인하도록 수정한 후 전체 흐름을 다시 실행해 통과했습니다.
 
+## 최초 GitHub CI 실행
+
+[실행 #1](https://github.com/team-khfc/Security-Advisor/actions/runs/42244615755)은 커밋 `daaf748f6bd222f937b2f379b58ac41f6bdf27ce`를 새 Ubuntu 실행기에서 검사했습니다.
+
+- 백엔드 Wrapper 실행·Java 25 검사·Testcontainers·JAR 빌드: 성공.
+- 새 `npm ci`, 프런트 검사와 production build: 성공.
+- Docker Compose 이미지 빌드·서비스 기동·HTTP 업무 흐름: 성공.
+- Chromium: 로그인·사업 생성까지 진행한 뒤, 반환 상태 자료가 없다는 검증 스크립트 전제에서 실패했습니다. 기존 자료에 의존하지 않고 실제 API로 반환 상태와 이전 값을 준비하도록 검증 스크립트를 수정했습니다. 이 최초 실행 전체를 성공으로 집계하지 않습니다.
+
+반환 시나리오 준비 수정 이후의 전체 브라우저 검사 결과는 위 PR의 해당 커밋 검사에서 확인합니다. 브라우저 검사는 합성 계정·실제 서버 API·작은 화면·기기 다크 설정을 사용하며 접근성 인증을 대신하지 않습니다.
+
 ## 실행하지 못했거나 별도 검증이 필요한 범위
 
 | 범위 | 상태·이유 | 다음 확인 경로 |
 |---|---|---|
-| 로컬 Docker 이미지 빌드·Compose 전체 기동 | **미검증**. 현재 실행 환경에서 Docker 사용 불가 | GitHub CI의 compose 작업 |
-| Testcontainers 경로 | **미검증**. 로컬 Docker 부재 | GitHub CI의 backend 작업 |
+| 로컬 Docker 이미지 빌드·Compose 전체 기동 | 로컬은 **미검증**. GitHub 실행 #1의 빌드·기동·HTTP는 성공 | 현재 커밋의 GitHub CI compose 작업 |
+| Testcontainers 경로 | 로컬은 **미검증**. GitHub 실행 #1의 backend 작업 성공 | 현재 커밋의 GitHub CI backend 작업 |
 | 로컬 Chromium 실제 화면 검사 | **실행 실패**. Chromium Unix 소켓이 제한되고 권한 확대 요청도 자동 정책에서 거절됨 | CI의 `scripts/browser-smoke.mjs` |
-| GitHub Actions 실행 | 이 문서 작성 시 실행 결과 미확인 | 해당 PR의 CI 실행 결과로 갱신 |
+| GitHub Actions 실행 | 최초 실행의 부분 결과는 위 기록에 명시 | 현재 결과는 해당 PR의 커밋별 CI 실행 |
 | 외부 LLM 2종 실호출·교체 구동 | **미검증**. 실제 키 미제공 | 승인된 키·모델로 별도 실행 증거 |
 | 외부 임베딩 모델 RAG·원문 전체 색인 | **미구현/미검증** | 자료·모델·검색 품질 수용 기준 먼저 확정 |
 | 전체 접근성·스크린리더·대비·확대·여러 OS/브라우저 | **미검증** | 설계 수용 기준에 따른 수동·도구 검사 |
