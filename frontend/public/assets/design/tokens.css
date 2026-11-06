@@ -8,7 +8,7 @@
   --sf-success-text:#267337; --sf-success-soft:#EAF6EC;
   --st1:#256EF4; --st2:#7B4BD8; --st3:#C96A00; --st4:#1F8A4C;
   --r-sm:4px; --r-ctl:6px; --r-card:10px; --r-panel:12px;
-  --work-h:clamp(60rem, calc(100dvh / .9 - 30rem), 120rem);
+  --work-h:clamp(60rem, calc(100dvh - 30rem), 120rem);
   color-scheme:light; box-sizing:border-box;
   padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
 }

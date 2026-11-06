@@ -1,4 +1,11 @@
-export { WorkspacePage, RequestsPage, CreatePage, RequestPage, DocumentsPage } from './Pages';
+export {
+  WorkspacePage,
+  RequestsPage,
+  CreatePage,
+  NewRequestIntake,
+  RequestPage,
+  DocumentsPage,
+} from './Pages';
 export { WorkspaceView, RequestsView } from './Overview';
 export { AnalysisView, EXAMPLE_PLAN, validateAnalysisFile } from './Analysis';
 export { DetailView } from './Details';

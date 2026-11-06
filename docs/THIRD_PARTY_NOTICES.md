@@ -5,7 +5,7 @@
 - Pretendard GOV 원본 글꼴: `frontend/public/assets/vendor/krds/Pretendard-LICENSE.txt`.
 - Lucide 기반 인라인 SVG 아이콘: `frontend/public/assets/vendor/Lucide-LICENSE.txt`(ISC).
 - KRDS 원본 디자인 토큰: `frontend/public/assets/vendor/krds/css/token/krds_tokens.css`. 공급 파일을 직접 수정하지 않고 프로젝트 별칭·추가 CSS를 사용한다.
-- 보안길잡이 프로젝트의 공통 CSS와 화면 배치는 사용자가 지정한 `team-khfc/prototype` 디자인 시안을 따른다.
+- 보안길잡이 프로젝트의 공통 CSS·화면 배치·밝은/어두운 PNG 로고는 사용자가 지정한 `team-khfc/prototype-soo` 커밋 `8cba744`를 따른다. PNG는 `frontend/public/assets/design/images/`에 둔다. 최초 개발 출발점 `team-khfc/prototype`과 현재 화면 기준을 구별한다.
 
 디자인 매핑과 자산 식별자는 `DESIGN_MAPPING.md`, 원본 문서 식별자는 `SOURCE_REFERENCES.md`를 참조한다. 외부 라이선스 문구의 저작자 표기는 권리 고지를 위한 것으로, 합성 시연 계정·업무 자료에 실존 인물 정보를 사용한 것이 아니다.
 

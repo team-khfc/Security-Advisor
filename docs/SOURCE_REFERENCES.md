@@ -1,25 +1,27 @@
 # 기준 자료와 출처
 
-확인일: 2026-11-06. 이 저장소는 팀 개발을 시작할 실행 코드와 공개용 지침을 모읍니다. 원본 문서의 식별자는 [source-manifest.json](source-manifest.json)에 기록합니다. 원본 SHA-256은 **사용자 제공 파일의 식별자**이며, 실명·연락처·비공개 첨부 링크를 공개용으로 정리한 복사본과 바이트가 같다는 주장은 아닙니다.
+확인일: 2026-11-07. 요구사항 원본 판본은 2026-11-06 제공본입니다. 이 저장소는 팀 개발을 시작할 실행 코드와 공개용 지침을 모읍니다. 원본 문서의 식별자는 [source-manifest.json](source-manifest.json)에 기록합니다. 원본 SHA-256은 **사용자 제공 파일의 식별자**이며, 실명·연락처·비공개 첨부 링크를 공개용으로 정리한 복사본과 바이트가 같다는 주장은 아닙니다.
 
 ## 프로젝트 원문
 
-| 용도 | 현재 기준 파일 | 기준 버전 |
-|---|---|---|
-| 전체 맥락·확정 결정 | [PROJECT_CONTEXT](../claude/PROJECT_CONTEXT.md) | v1.9 |
-| 기능·도메인 불변식 | [FUNCTIONAL_SPEC](../claude/FUNCTIONAL_SPEC.md) | v1.2 |
-| 사람·AI 공통 개발 규칙 | [AGENTS](../AGENTS.md) | v1.5 |
-| 팀·범위·일정·제출 | [PROJECT_RULES](../claude/PROJECT_RULES.md) | v1.4 |
-| Google 기반 코드 규칙 | [CODING_STYLE](../CODING_STYLE.md) | 제공본 식별자는 manifest |
-| KISA 기반 보안 규칙 | [SECURE_CODING](../claude/SECURE_CODING.md) | 제공본 식별자는 manifest |
-| 협업·API·수용 기준 | [CONTRIBUTING](../CONTRIBUTING.md) | v0.6 |
-| 화면·KRDS·접근성 | [design.md](../design.md) | **v3.1** |
+| 용도                   | 현재 기준 파일                                  | 기준 버전                |
+| ---------------------- | ----------------------------------------------- | ------------------------ |
+| 전체 맥락·확정 결정    | [PROJECT_CONTEXT](../claude/PROJECT_CONTEXT.md) | v1.9                     |
+| 기능·도메인 불변식     | [FUNCTIONAL_SPEC](../claude/FUNCTIONAL_SPEC.md) | v1.2                     |
+| 사람·AI 공통 개발 규칙 | [AGENTS](../AGENTS.md)                          | v1.5                     |
+| 팀·범위·일정·제출      | [PROJECT_RULES](../claude/PROJECT_RULES.md)     | v1.4                     |
+| Google 기반 코드 규칙  | [CODING_STYLE](../CODING_STYLE.md)              | 제공본 식별자는 manifest |
+| KISA 기반 보안 규칙    | [SECURE_CODING](../claude/SECURE_CODING.md)     | 제공본 식별자는 manifest |
+| 협업·API·수용 기준     | [CONTRIBUTING](../CONTRIBUTING.md)              | v0.6                     |
+| 화면·KRDS·접근성       | [design.md](../design.md)                       | **v3.1**                 |
 
 PROJECT_CONTEXT v1.9의 문서 지도에 남아 있는 design v3.0 참조는 원문을 보존합니다. 실제 최신 제공 디자인 규칙은 루트 `design.md` v3.1이며 이번 구현은 이를 사용합니다. 디자인의 업무 의미는 FUNCTIONAL_SPEC, 시각 표현·컴포넌트 계약은 design.md를 따릅니다.
 
 루트의 PROJECT_CONTEXT·FUNCTIONAL_SPEC·PROJECT_RULES·SECURE_CODING 파일은 `claude/`의 기준 파일로 연결하는 안내입니다. 요약과 원문이 다르면 원문을 확인합니다. 상세 구현 가정은 ADR과 CONTRACT에 기록하며 이를 원문 확정 결정으로 위장하지 않습니다.
 
 ## 디자인·코드 출발점
+
+**현재 화면 기준은 사용자가 정정하여 지정한 [prototype-soo 신청 현황](https://team-khfc.github.io/prototype-soo/requests.html)입니다.** [원본 커밋 8cba7444d66fae5d245df150348ad6ce034413a4](https://github.com/team-khfc/prototype-soo/tree/8cba7444d66fae5d245df150348ad6ce034413a4)의 HTML·CSS·로고를 대조했습니다. 업무 동작·권한·데이터·접근성 수치는 현재 기능 명세와 design.md v3.1을 유지합니다. 아래 `prototype` 커밋은 최초 개발 입력의 출처이며 현재 화면 대조 기준과 구분합니다.
 
 - 개발·디자인 시작점: [team-khfc/prototype](https://github.com/team-khfc/prototype).
 - 이번 입력 스냅샷: [커밋 3900181bc85440780b199266a75f1b789f76f2d0](https://github.com/team-khfc/prototype/tree/3900181bc85440780b199266a75f1b789f76f2d0).
@@ -41,11 +43,11 @@ PROJECT_CONTEXT v1.9의 문서 지도에 남아 있는 design v3.0 참조는 원
 
 2026-11-06 공식 릴리스에서 확인한 commit SHA를 workflow에 고정했습니다. 이 조회는 로컬 또는 GitHub CI를 실제 실행했다는 뜻이 아닙니다.
 
-| Action | 릴리스 | 고정 commit |
-|---|---|---|
-| checkout | [v7.0.1](https://github.com/actions/checkout/releases/tag/v7.0.1) | `3d3c42e5aac5ba805825da76410c181273ba90b1` |
-| setup-node | [v7.1.0](https://github.com/actions/setup-node/releases/tag/v7.1.0) | `949feb2413d6458794dcd2491c4babbbce0c15c1` |
-| setup-java | [v6.2.0](https://github.com/actions/setup-java/releases/tag/v6.2.0) | `77dd5b2ce225ea11469928ac317850245a74ae78` |
+| Action          | 릴리스                                                                   | 고정 commit                                |
+| --------------- | ------------------------------------------------------------------------ | ------------------------------------------ |
+| checkout        | [v7.0.1](https://github.com/actions/checkout/releases/tag/v7.0.1)        | `3d3c42e5aac5ba805825da76410c181273ba90b1` |
+| setup-node      | [v7.1.0](https://github.com/actions/setup-node/releases/tag/v7.1.0)      | `949feb2413d6458794dcd2491c4babbbce0c15c1` |
+| setup-java      | [v6.2.0](https://github.com/actions/setup-java/releases/tag/v6.2.0)      | `77dd5b2ce225ea11469928ac317850245a74ae78` |
 | upload-artifact | [v7.0.2](https://github.com/actions/upload-artifact/releases/tag/v7.0.2) | `cf430e030ddbb5b0abf93d22962f4752f3646cd9` |
 
 키·계정·참가자 연락처가 포함될 수 있는 원본 대회 첨부물은 이 공개 저장소에 복제하지 않습니다. 대회 제출·모델 권장과 팀 자체 완료 조건은 PROJECT_RULES·TEAM_START에서 구분합니다.

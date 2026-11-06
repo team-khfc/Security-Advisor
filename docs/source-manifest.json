@@ -50,5 +50,12 @@
       "project_file": "design.md",
       "public_copy": "개인 연락처·실명은 역할명으로 치환, 비공개 첨부 링크는 공개 출처로 대체"
     }
-  ]
+  ],
+  "visual_reference": {
+    "repository": "https://github.com/team-khfc/prototype-soo",
+    "deployed_page": "https://team-khfc.github.io/prototype-soo/requests.html",
+    "commit": "8cba7444d66fae5d245df150348ad6ce034413a4",
+    "review_date": "2026-11-07",
+    "authority": "사용자가 지정한 현재 화면 기준; 업무 규칙은 최신 제공 명세 유지"
+  }
 }

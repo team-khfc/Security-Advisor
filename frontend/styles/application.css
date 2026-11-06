@@ -1466,20 +1466,3 @@ main {
     scroll-behavior: auto !important;
   }
 }
-
-:root {
-  color-scheme: light;
-  --sf-primary: var(--sf-primary);
-  --sf-primary-hover: var(--sf-primary-text);
-  --sf-primary-text: var(--sf-primary-text);
-  --sf-primary-soft: var(--sf-primary-soft);
-  --sf-text: var(--sf-text);
-  --sf-muted: var(--sf-muted);
-  --sf-surface: #fff;
-  --sf-background: var(--sf-background);
-  --sf-border: var(--sf-border);
-  --sf-focus: var(--sf-primary-text);
-  --sf-danger-soft: var(--sf-danger-soft);
-  --sf-warning-soft: var(--sf-warning-soft);
-  --sf-success-soft: var(--sf-success-soft);
-}

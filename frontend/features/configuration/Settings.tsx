@@ -37,26 +37,15 @@ export function AdminHeader({
 }) {
   return (
     <>
-      <Heading
-        title="기관 설정"
-        description="질문과 검토 절차를 관리하고, 준비된 설정을 새 신청부터 적용하세요."
-      >
-        <Badge tone="green">게시본 v{settings.publishedVersion}</Badge>
-        <Badge tone="amber">수정 초안 r{settings.revision}</Badge>
-      </Heading>
-      <div className="admin-status">
-        <div>
-          <span className="institution-icon">
-            <Icon name="building" width={28} height={28} />
-          </span>
-          <div>
-            <strong>{settings.draft.institutionName}</strong>
-            <p>기관 관리자 · 설정의 변경과 적용 범위를 확인해 주세요.</p>
-          </div>
+      <Heading title="기관 설정" />
+      <div className="org-bar">
+        <div className="verbar">
+          <Badge tone="green">게시본 v{settings.publishedVersion}</Badge>
+          <Badge tone="amber">수정 초안 r{settings.revision}</Badge>
         </div>
-        <span>기존 신청의 설정 버전 유지</span>
+        <span className="help">{settings.draft.institutionName} · 기존 신청의 설정 버전 유지</span>
       </div>
-      <nav className="section-nav" aria-label="기관 설정 분류">
+      <nav className="tabs" aria-label="기관 설정 분류">
         {Object.entries(tabLabels).map(([path, title]) => (
           <Link
             key={path}
@@ -65,7 +54,9 @@ export function AdminHeader({
             href={preview ? `/design-preview/admin?tab=${path}` : `/admin/${path}`}
           >
             {title}
-            {path === 'questions' && <span> {settings.draft.questions.length}</span>}
+            {path === 'questions' && (
+              <span className="tcount">{settings.draft.questions.length}</span>
+            )}
           </Link>
         ))}
       </nav>
@@ -101,6 +92,7 @@ export function AdminView({
   children?: React.ReactNode;
 }) {
   const [query, setQuery] = useState('');
+  const [searchText, setSearchText] = useState('');
   const [selectedKey, setSelectedKey] = useState(policy.questions[0]?.key ?? '');
   const selected =
     policy.questions.find((question) => question.key === selectedKey) ?? policy.questions[0];
@@ -135,72 +127,80 @@ export function AdminView({
       <ErrorNotice error={error} />
       {tab === 'questions' && (
         <>
-          <div className="admin-grid">
-            <section className="sf-panel question-list">
-              <div className="panel-heading">
-                <h2>기관 추가 질문</h2>
-                <button
-                  className="icon-button"
-                  type="button"
-                  disabled={locked || policy.questions.length >= 30}
-                  aria-label="기관 질문 추가"
-                  onClick={add}
-                >
-                  <Icon name="plus" />
-                </button>
-              </div>
-              <label className="sr-only" htmlFor="question-search">
-                질문 검색
-              </label>
-              <div className="search-input">
-                <Icon name="search" />
-                <input
-                  id="question-search"
-                  value={query}
-                  onChange={(event) => setQuery(event.target.value)}
-                  placeholder="질문 검색"
-                />
-              </div>
-              <div className="question-items">
+          <div className="qgrid">
+            <section className="qlist-wrap" aria-label="기관 추가 질문">
+              <form
+                className="field"
+                onSubmit={(event) => {
+                  event.preventDefault();
+                  setQuery(searchText);
+                }}
+              >
+                <label htmlFor="question-search">질문 검색</label>
+                <div className="qrow">
+                  <input
+                    id="question-search"
+                    className="input"
+                    type="search"
+                    value={searchText}
+                    onChange={(event) => setSearchText(event.target.value)}
+                    placeholder="질문 검색"
+                  />
+                  <button type="submit" className="btn btn-tertiary">
+                    검색
+                  </button>
+                </div>
+              </form>
+              <ol className="qlist">
                 {policy.questions
                   .filter((question) => `${question.label} ${question.key}`.includes(query))
                   .map((question, index) => (
-                    <button
-                      type="button"
-                      key={question.key}
-                      className={question.key === selected?.key ? 'selected' : ''}
-                      onClick={() => setSelectedKey(question.key)}
-                    >
-                      <span className="question-order">{String(index + 1).padStart(2, '0')}</span>
-                      <div>
-                        <strong>{question.label}</strong>
-                        <small>
-                          {ROLE_LABELS[question.ownerRole]} ·{' '}
-                          {question.required ? '제출 전 필수' : '선택'}
-                        </small>
-                      </div>
-                      <Icon name="arrow" width={16} height={16} />
-                    </button>
+                    <li key={question.key}>
+                      <button
+                        type="button"
+                        aria-pressed={question.key === selected?.key}
+                        onClick={() => setSelectedKey(question.key)}
+                      >
+                        <span className="qn">{String(index + 1).padStart(2, '0')}</span>
+                        <span>
+                          <b>{question.label}</b>
+                          <span className="help">
+                            {ROLE_LABELS[question.ownerRole]} ·{' '}
+                            {question.required ? '제출 전 필수' : '선택'}
+                          </span>
+                        </span>
+                      </button>
+                    </li>
                   ))}
-              </div>
+              </ol>
               {!policy.questions.length && (
                 <Empty
                   title="추가 질문이 없습니다"
                   description="기본 질문에 더해 기관의 확인 항목을 추가할 수 있습니다."
                 />
               )}
+              {policy.questions.length > 0 &&
+                !policy.questions.some((question) =>
+                  `${question.label} ${question.key}`.includes(query),
+                ) && <p className="help">검색 결과가 없습니다. 검색어를 바꿔 보세요.</p>}
+              <button
+                className="btn btn-block"
+                type="button"
+                disabled={locked || policy.questions.length >= 30}
+                aria-label="기관 질문 추가"
+                onClick={add}
+              >
+                질문 추가
+              </button>
               <p className="role-caption">
                 사업 목적·이용 대상·처리 정보 등 기본 질문은 공통 기준으로 유지됩니다.
               </p>
             </section>
-            <section className="sf-panel question-editor">
+            <section className="card question-editor">
               {selected ? (
                 <>
-                  <div className="panel-heading">
-                    <div>
-                      <span className="overline">질문 설정</span>
-                      <h2>{selected.label}</h2>
-                    </div>
+                  <div className="card-h">
+                    <h2 className="h-panel">질문 설정: {selected.label}</h2>
                     <Badge tone="amber">수정 초안</Badge>
                   </div>
                   <div className="sf-field">
@@ -295,7 +295,7 @@ export function AdminView({
               ) : (
                 <Empty
                   title="편집할 질문을 선택해 주세요"
-                  description="왼쪽의 더하기 버튼으로 기관 추가 질문을 만들 수 있습니다."
+                  description="왼쪽의 ‘질문 추가’ 버튼으로 기관 확인 항목을 만들 수 있습니다."
                 />
               )}
             </section>
@@ -303,21 +303,19 @@ export function AdminView({
         </>
       )}
       {tab === 'workflow' && (
-        <section className="sf-panel workflow-panel">
-          <h2>검토 절차와 문서 양식</h2>
+        <section className="card workflow-panel">
+          <h2 className="h-panel">기관 검토 절차</h2>
+          <p className="help">현재 게시 절차: ICT인프라 선행 · 양측 협의 필수</p>
           <Notice>
             1차 범위의 절차는 ICT인프라 선행으로 고정됩니다. 할당 완료와 협의 완료를 분리하고 양측
             협의가 끝나야 사용자 최종 검토로 이동합니다.
           </Notice>
-          <div className="workflow-preview">
-            <span>1. 작성</span>
-            <Icon name="arrow" />
-            <span>2. 인프라 할당 → 보안 검토 · 양측 협의</span>
-            <Icon name="arrow" />
-            <span>3. 사용자 최종 검토</span>
-            <Icon name="arrow" />
-            <span>4. 확정·관리</span>
-          </div>
+          <ol className="flow">
+            <li>1. 작성</li>
+            <li>2. 인프라 할당 → 보안 검토 · 양측 협의</li>
+            <li>3. 사용자 최종 검토</li>
+            <li>4. 확정·관리</li>
+          </ol>
           <fieldset disabled>
             <legend>필수 검토 역할 · 변경 불가</legend>
             <label className="check-label">
@@ -347,13 +345,13 @@ export function AdminView({
         </section>
       )}
       {tab === 'versions' && (
-        <section className="sf-panel">
-          <div className="panel-heading">
-            <h2>게시 이력</h2>
+        <section className="card">
+          <div className="card-h">
+            <h2 className="h-panel">게시 이력</h2>
             <Icon name="clock" />
           </div>
-          <div className="table-scroll">
-            <table className="sf-table">
+          <div className="tbl-wrap">
+            <table className="tbl">
               <caption className="sr-only">기관 설정 게시 버전과 적용 범위</caption>
               <thead>
                 <tr>
@@ -393,7 +391,7 @@ export function AdminView({
       {tab === 'models' && <ModelSettingsPreview />}
       {children}
       {tab !== 'context' && tab !== 'models' && (
-        <div className="admin-save">
+        <div className="actions">
           <div>
             <strong>
               {localDirty
@@ -408,23 +406,23 @@ export function AdminView({
                 : '게시한 설정은 이후 새 신청부터 적용됩니다.'}
             </p>
           </div>
-          <div className="form-actions compact">
+          <div className="btn-row">
             <button
-              className="button primary"
+              className="btn"
+              type="button"
+              disabled={preview || busy || !localDirty}
+              onClick={onSave}
+            >
+              설정 초안 저장
+            </button>
+            <button
+              className="btn btn-primary"
               type="button"
               disabled={preview || busy || localDirty || !publishedDiff}
               onClick={onPublish}
             >
               변경 검토·게시
               <Icon name="arrow" />
-            </button>
-            <button
-              className="button"
-              type="button"
-              disabled={preview || busy || !localDirty}
-              onClick={onSave}
-            >
-              초안 저장
             </button>
           </div>
         </div>

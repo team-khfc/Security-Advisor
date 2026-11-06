@@ -12,7 +12,14 @@ export function Badge({
   children: ReactNode;
   tone?: 'gray' | 'blue' | 'green' | 'amber' | 'red';
 }) {
-  return <span className={`sf-badge ${tone}`}>{children}</span>;
+  const variants = {
+    gray: 'b-neutral',
+    blue: 'b-info',
+    green: 'b-success',
+    amber: 'b-warning',
+    red: 'b-danger',
+  };
+  return <span className={`badge sf-badge ${variants[tone]} ${tone}`}>{children}</span>;
 }
 /** 화면 목적과 주요 행동을 같은 제목 영역에 모아 지정 시안의 구조를 유지한다. */
 export function Heading({
@@ -28,21 +35,24 @@ export function Heading({
     document.title = `${title} | SecurityAdvisor`;
   }, [title]);
   return (
-    <div className="sf-heading">
+    <div className="page-head sf-heading">
       <div>
         <h1 id="page-title" tabIndex={-1}>
           {title}
         </h1>
-        {description && <p>{description}</p>}
+        {description && <p className="page-desc">{description}</p>}
       </div>
-      {children && <div className="sf-heading-actions">{children}</div>}
+      {children && <div className="btn-row sf-heading-actions">{children}</div>}
     </div>
   );
 }
 /** 업무 상태 안내와 실패 안내를 구분하고 실패는 보조기기에도 알린다. */
 export function Notice({ children, error = false }: { children: ReactNode; error?: boolean }) {
   return (
-    <div className={`sf-notice ${error ? 'error' : 'info'}`} role={error ? 'alert' : undefined}>
+    <div
+      className={`notice sf-notice ${error ? 'n-danger error' : 'n-info info'}`}
+      role={error ? 'alert' : undefined}
+    >
       <Icon name="info" />
       <div>{children}</div>
     </div>
@@ -88,7 +98,7 @@ export function Empty({
   children?: ReactNode;
 }) {
   return (
-    <div className="empty-state">
+    <div className="empty-box empty-state">
       <Icon name="file" width={40} height={40} />
       <h3>{title}</h3>
       <p>{description}</p>
@@ -109,14 +119,14 @@ export function Stepper({
   const labels = ['작성', '담당자 협의', '사용자 최종 검토', '확정·관리'];
   void detail;
   return (
-    <ol className="sf-stepper" aria-label="신청 진행 단계">
+    <ol className="stepper" aria-label="신청 진행 단계">
       {labels.map((label, index) => (
         <li
           key={label}
           className={index < current ? 'done' : index === current ? 'current' : ''}
           aria-current={index === current ? 'step' : undefined}
         >
-          <span>{index < current ? <Icon name="check" width={16} height={16} /> : index + 1}</span>
+          <span className="n">{index + 1}단계</span>
           <strong>{label}</strong>
           {returned && index === current && <Badge tone="amber">반환됨</Badge>}
         </li>
@@ -180,20 +190,19 @@ export function Modal({
         if (!locked) onClose();
       }}
     >
-      <div className="dialog-heading">
-        <h2 id={headingId}>{title}</h2>
+      <div className="dlg">
+        <div className="dlg-h">
+          <h2 className="h-panel" id={headingId}>
+            {title}
+          </h2>
+        </div>
+        <div className="dlg-b">{children}</div>
+        {!locked && (
+          <button className="dlg-x" type="button" onClick={onClose} aria-label="대화상자 닫기">
+            <Icon name="close" />
+          </button>
+        )}
       </div>
-      {children}
-      {!locked && (
-        <button
-          className="icon-button modal-close"
-          type="button"
-          onClick={onClose}
-          aria-label="대화상자 닫기"
-        >
-          <Icon name="close" />
-        </button>
-      )}
     </dialog>
   );
 }

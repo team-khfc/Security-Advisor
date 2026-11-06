@@ -191,11 +191,11 @@ a.plain:hover{text-decoration:underline}
 .side-tg svg{transition:transform .2s ease}
 .side a{position:relative}
 @media (min-width:1024px){
-  body.side-collapsed .shell{grid-template-columns:0 minmax(0,1fr)}
-  body.side-collapsed .side{padding:0;min-width:0;border-right:0}
-  body.side-collapsed .side>:not(.side-tg){display:none}
-  body.side-collapsed .side-tg{right:-2rem}
-  body.side-collapsed .side-tg svg{transform:rotate(180deg)}
+  .prototype-app.side-collapsed .shell{grid-template-columns:0 minmax(0,1fr)}
+  .prototype-app.side-collapsed .side{padding:0;min-width:0;border-right:0}
+  .prototype-app.side-collapsed .side>:not(.side-tg){display:none}
+  .prototype-app.side-collapsed .side-tg{right:-2rem}
+  .prototype-app.side-collapsed .side-tg svg{transform:rotate(180deg)}
 }
 @media (max-width:1023px){
   .side-tg{display:none}

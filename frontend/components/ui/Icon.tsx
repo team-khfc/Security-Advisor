@@ -1,6 +1,13 @@
 import type { SVGProps } from 'react';
 
 const paths = {
+  pencil: 'M4 20h4L19 9l-4-4L4 16v4zM13.5 6.5l4 4',
+  users:
+    'M12.2 8a3.2 3.2 0 1 1-6.4 0 3.2 3.2 0 0 1 6.4 0M3 19c.6-3.2 3-5 6-5s5.4 1.8 6 5M15.5 5.2a3 3 0 0 1 0 5.6M17.5 14.3c1.8.7 3 2.3 3.4 4.7',
+  'chevron-right': 'M9 5l7 7-7 7',
+  inbox:
+    'M22 12h-6l-2 3h-4l-2-3H2M5.5 5.1L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.5-6.9A2 2 0 0 0 16.8 4H7.2a2 2 0 0 0-1.7 1.1z',
+  message: 'M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z',
   shield: 'M12 22s8-4 8-11V5l-8-3-8 3v6c0 7 8 11 8 11 M9 12l2 2 4-4',
   home: 'M3 10l9-7 9 7v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V10 M9 21v-8h6v8',
   list: 'M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01',
@@ -25,6 +32,7 @@ const paths = {
   sparkle: 'm12 3 2.5 6.5L21 12l-6.5 2.5L12 21l-2.5-6.5L3 12l6.5-2.5z',
   server: 'M4 3h16v7H4zM4 14h16v7H4zM8 6.5h.01M8 17.5h.01',
   lock: 'M5 11h14v11H5zM8 11V6a4 4 0 0 1 8 0v5',
+  bell: 'M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10.3 21a1.94 1.94 0 0 0 3.4 0',
 } as const;
 export type IconName = keyof typeof paths;
 /** 장식 아이콘을 접근성 트리에서 숨겨 버튼의 한국어 이름이 중복 낭독되지 않게 한다. */

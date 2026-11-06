@@ -1,10 +1,10 @@
 'use client';
-import { useState } from 'react';
 import Link from 'next/link';
 import { AppShell } from '@/components/layout';
 import { Notice, Badge, Heading, Icon, Stepper } from '@/components/ui';
 import {
   RequestsView,
+  NewRequestIntake,
   AnalysisView,
   DetailView,
   NetworkTable,
@@ -22,83 +22,10 @@ import {
   previewAnalyses,
 } from './fixtures';
 function NewRequestPreview() {
-  const [type, setType] = useState('FIREWALL');
   return (
     <>
-      <Heading
-        title="새 신청 시작"
-        description="작성할 서류를 선택하고 알고 있는 사업 정보부터 알려주세요."
-      />
-      <Stepper current={0} />
-      <div className="form-layout">
-        <section className="sf-panel form-panel">
-          <h2>어떤 보안 신청을 준비하시나요?</h2>
-          <div className="document-choice">
-            {[
-              ['FIREWALL', '방화벽 신청서', '외부 서비스·시스템과 통신이 필요할 때'],
-              ['SECURITY_REVIEW', '보안성검토 신청서', '새 서비스나 정보화 사업을 검토할 때'],
-            ].map(([value, label, description]) => (
-              <label key={value} className={type === value ? 'selected' : ''}>
-                <input
-                  type="radio"
-                  name="preview-document-type"
-                  value={value}
-                  checked={type === value}
-                  onChange={() => setType(value)}
-                />
-                <span>
-                  <strong>{label}</strong>
-                  <small>{description}</small>
-                </span>
-              </label>
-            ))}
-          </div>
-          <div className="sf-field">
-            <label htmlFor="preview-title">
-              프로젝트명 <span className="required">필수</span>
-            </label>
-            <input id="preview-title" value="공개 안내 챗봇 서비스 구축 (합성)" readOnly />
-          </div>
-          <div className="sf-field">
-            <label htmlFor="preview-department">신청 부서</label>
-            <input id="preview-department" value="디지털서비스팀 (합성)" readOnly />
-          </div>
-          <div className="sf-field">
-            <label htmlFor="preview-description">사업 설명</label>
-            <textarea
-              id="preview-description"
-              rows={5}
-              readOnly
-              value="공개된 안내 자료를 쉽게 찾을 수 있도록 챗봇을 준비합니다. 공개 FAQ와 합성 질문을 사용하며 내부 시스템 연계 사항은 담당자와 협의합니다."
-            />
-          </div>
-          <Notice>
-            자료가 없어도 직접 설명할 수 있습니다. 파일 선택만으로는 서버에 전송하지 않으며, 분석
-            시작 버튼에서 전송 내용을 확인합니다.
-          </Notice>
-          <div className="form-actions">
-            <Link className="button primary" href="/design-preview/analysis">
-              자료·AI 분석 화면 보기
-              <Icon name="arrow" />
-            </Link>
-          </div>
-        </section>
-        <aside className="form-help">
-          <section className="sf-panel">
-            <span className="overline">작성 안내</span>
-            <h3>모르는 기술 정보는 함께 확인해요.</h3>
-            <p>사업 목적·이용 대상은 신청자가, 서버·IP·포트는 ICT인프라 담당자가 입력합니다.</p>
-            <hr />
-            <h4>절차는 4단계입니다</h4>
-            <ol className="notes-list">
-              <li>작성 · 업로드와 AI 인터뷰</li>
-              <li>담당자 협의 · 인프라 선행</li>
-              <li>사용자 최종 검토</li>
-              <li>확정·관리 · 적용은 별도</li>
-            </ol>
-          </section>
-        </aside>
-      </div>
+      <Heading title="새 신청" />
+      <NewRequestIntake preview />
     </>
   );
 }

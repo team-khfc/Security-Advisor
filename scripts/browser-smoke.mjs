@@ -75,6 +75,14 @@ async function inspect(page, name, screenshot = true) {
     title: document.querySelector("main h1")?.textContent,
     fontLoaded: document.fonts.check('17px "Pretendard GOV"', "보안길잡이"),
     fontFamily: getComputedStyle(document.body).fontFamily,
+    colorTokens: Object.fromEntries(
+      ["primary", "text", "surface", "background", "border"].map((name) => [
+        name,
+        getComputedStyle(document.documentElement)
+          .getPropertyValue(`--sf-${name}`)
+          .trim(),
+      ]),
+    ),
   }));
   assert(
     metrics.bodyFontSize >= 17,
@@ -93,9 +101,56 @@ async function inspect(page, name, screenshot = true) {
     ["1", "normal"].includes(metrics.zoom),
     `${name}: body zoom ${metrics.zoom}`,
   );
+  for (const [token, value] of Object.entries(metrics.colorTokens)) {
+    assert(value, `${name}: --sf-${token} must resolve without a CSS cycle`);
+  }
   results.push({ check: name, result: "PASS", ...metrics });
   if (screenshot)
     await page.screenshot({ path: `${output}/${name}.png`, fullPage: true });
+}
+
+// 기존 화면에서는 CSS 토큰 순환 참조로 카드·선·선택 색상이 사라져도 통과했다.
+// 지정 시안의 핵심 구조와 실제 계산 색상을 함께 확인한다.
+async function inspectRequestDesign(page) {
+  assert.equal(await page.locator(".stats .stat").count(), 4);
+  assert.deepEqual(
+    await page.locator("main table thead th").allTextContents(),
+    [
+      "신청번호·프로젝트명",
+      "진행 단계",
+      "다음 할 일",
+      "처리 기한",
+      "상태",
+      "처리",
+    ],
+  );
+  assert.equal(await page.locator("main table tbody tr").count(), 5);
+  const colors = await page.evaluate(() => {
+    const style = (selector) =>
+      getComputedStyle(document.querySelector(selector));
+    const logo = document.querySelector(".hd .logo-l");
+    return {
+      background: getComputedStyle(document.body).backgroundColor,
+      card: style(".stats .stat").backgroundColor,
+      cardBorder: style(".stats .stat").borderTopColor,
+      activeMenu: style('.side a[aria-current="page"]').backgroundColor,
+      primaryAction: style(".page-head .btn-primary").backgroundColor,
+      logoLoaded: logo.complete && logo.naturalWidth > 0,
+    };
+  });
+  assert.deepEqual(colors, {
+    background: "rgb(244, 245, 246)",
+    card: "rgb(255, 255, 255)",
+    cardBorder: "rgb(205, 209, 213)",
+    activeMenu: "rgb(236, 242, 254)",
+    primaryAction: "rgb(37, 110, 244)",
+    logoLoaded: true,
+  });
+  results.push({
+    check: "Reference request layout and rendered color regression",
+    result: "PASS",
+    ...colors,
+  });
 }
 
 async function writeRequest(page, method, endpoint, data) {
@@ -160,10 +215,28 @@ async function arrangeReturnedRequest(page, created) {
 try {
   const applicant = await account("APPLICANT");
   const page = applicant.page;
+  await inspect(page, "requests-desktop");
+  await inspectRequestDesign(page);
+  await page.locator(".ubtn").click();
+  await page.getByRole("button", { name: "화면 설정", exact: true }).click();
+  const displayDialog = page.getByRole("dialog", { name: "화면 설정" });
+  await displayDialog.waitFor();
+  await displayDialog
+    .getByRole("button", { name: "확인", exact: true })
+    .click();
+  await displayDialog.waitFor({ state: "hidden" });
+  await page.waitForFunction(() =>
+    document.activeElement?.classList.contains("ubtn"),
+  );
+  results.push({
+    check: "Display dialog restores focus to the persistent account button",
+    result: "PASS",
+  });
   await page.goto("/workspace");
-  await inspect(page, "workspace-desktop");
+  await inspect(page, "workspace-desktop", false);
   await page.goto("/requests/new");
-  await inspect(page, "new-request-desktop", false);
+  await inspect(page, "new-request-desktop");
+  await page.getByRole("button", { name: "기획서 없이 대화로 시작" }).click();
   await page
     .locator("#project-title")
     .fill("[브라우저 합성 검증] 공개 안내 서비스");
@@ -174,7 +247,7 @@ try {
       "실제 내부 정보 없이 공개 안내 자료로 화면과 서버 연결을 검증합니다.",
     );
   await page.getByRole("button", { name: "초안 생성 후 다음 단계" }).click();
-  await page.waitForURL(/\/requests\/[0-9a-f-]+\/analysis/);
+  await page.waitForURL(/\/requests\/[0-9a-f-]+\/questions/);
   await page.locator("main h1").first().waitFor();
   const id = page.url().split("/")[4];
   const created = await (
@@ -199,6 +272,49 @@ try {
     );
     await inspect(page, "returned-request");
   }
+  await page.goto("/requests/new");
+  await page.getByLabel("사업 자료 파일 선택").setInputFiles({
+    name: "synthetic-plan.txt",
+    mimeType: "text/plain",
+    buffer: Buffer.from(
+      "공개 안내 자료와 합성 질문만 사용하는 시연용 사업입니다.",
+    ),
+  });
+  await page.locator("#project-title").fill("[브라우저 합성 검증] 자료 전달");
+  await page.locator("#department").fill("가상 개발팀");
+  await page
+    .locator("#description")
+    .fill("합성 TXT 파일의 선택과 전송을 분리하여 확인합니다.");
+  await page.getByRole("button", { name: "초안 생성 후 다음 단계" }).click();
+  await page.waitForURL(/\/requests\/[0-9a-f-]+\/analysis/);
+  const fileRequestId = page.url().split("/")[4];
+  await page.getByText("synthetic-plan.txt", { exact: true }).waitFor();
+  const beforeAnalysis = await page.request.get(
+    `/api/security-requests/${fileRequestId}/analysis`,
+  );
+  assert.equal(beforeAnalysis.status(), 200);
+  assert.deepEqual(
+    await beforeAnalysis.json(),
+    [],
+    "Selecting a file must not start analysis",
+  );
+  await inspect(page, "analysis-before-transmission");
+  const responsePromise = page.waitForResponse(
+    (response) =>
+      response
+        .url()
+        .endsWith(`/api/security-requests/${fileRequestId}/analysis`) &&
+      response.request().method() === "POST",
+  );
+  await page.getByRole("button", { name: "파일 전송 및 AI 분석 시작" }).click();
+  const analysisResponse = await responsePromise;
+  assert.equal(analysisResponse.status(), 200);
+  assert.equal((await analysisResponse.json()).status, "SUCCEEDED");
+  results.push({
+    check:
+      "Selected file survives creation and is sent only on explicit analysis",
+    result: "PASS",
+  });
   for (const status of ["CLOSED", "WITHDRAWN"]) {
     const item = requests.find((entry) => entry.status === status);
     assert(item, `${status} synthetic scenario`);
@@ -220,6 +336,24 @@ try {
     await inspect(specialist.page, `${role.toLowerCase()}-workspace`, false);
     await specialist.context.close();
   }
+  for (const [screen, name] of [
+    ["requests", "reference-requests-preview"],
+    ["new-request", "reference-new-request-preview"],
+    ["infra", "reference-detail-preview"],
+  ]) {
+    await page.goto(`/design-preview/${screen}`);
+    await inspect(page, name);
+    if (screen === "infra") {
+      await page
+        .getByRole("region", { name: "사업 정보", exact: true })
+        .getByText("AI 제안 · 미확정", { exact: true })
+        .waitFor();
+      results.push({
+        check: "Detail summary preserves the unconfirmed AI source label",
+        result: "PASS",
+      });
+    }
+  }
   const administrator = await account("ADMIN");
   await administrator.page.goto("/admin/workflow");
   await inspect(administrator.page, "administrator-workflow");
@@ -233,9 +367,9 @@ try {
     isMobile: true,
     deviceScaleFactor: 1,
   });
-  await mobile.page.goto("/workspace");
-  await inspect(mobile.page, "workspace-mobile");
-  const menu = mobile.page.getByRole("button", { name: "주요 메뉴 열기" });
+  await mobile.page.goto("/requests");
+  await inspect(mobile.page, "requests-mobile");
+  const menu = mobile.page.getByRole("button", { name: "메뉴", exact: true });
   await menu.click();
   assert.equal(await menu.getAttribute("aria-expanded"), "true");
   results.push({
@@ -244,8 +378,8 @@ try {
   });
   await mobile.context.close();
   const dark = await account("APPLICANT", { colorScheme: "dark" });
-  await dark.page.goto("/workspace");
-  await inspect(dark.page, "workspace-dark");
+  await dark.page.goto("/requests");
+  await inspect(dark.page, "requests-dark");
   const background = await dark.page.evaluate(
     () => getComputedStyle(document.body).backgroundColor,
   );

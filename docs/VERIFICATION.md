@@ -4,17 +4,29 @@
 
 이 문서는 로컬 검증과 최초 CI의 기록입니다. 이후 커밋의 현재 CI 상태·브라우저 결과는 [PR #2의 검사](https://github.com/team-khfc/Security-Advisor/pull/2/checks)와 [실행 목록](https://github.com/team-khfc/Security-Advisor/actions/workflows/ci.yml)을 확인합니다.
 
+## 2026-11-07 시각 수정 검증
+
+사용자가 지정한 `prototype-soo/requests.html`과 이전 CI 스크린샷을 직접 대조해 셸·목록의 구조 차이와 색상 소실을 확인했습니다. `application.css`의 후행 자기 참조 토큰을 제거하고 원본 로고·CSS·화면 구조를 적용했습니다. 현재 화면 출처는 [DESIGN_MAPPING](DESIGN_MAPPING.md)과 [source manifest](source-manifest.json)에 기록합니다.
+
+- 프런트 `npm run check`: Prettier·TypeScript·ESLint와 **3파일 21건** 통과. 최초에는 변경된 분석 버튼·선택 상태 문구 때문에 기존 검사 2건이 실패했습니다. 미전송 문구를 복원하고, 파일이 있는 경우와 텍스트만 있는 경우의 읽기 전용 검사를 각각 유지했습니다. 재시도 실패가 이전 성공 배지를 남기지 않는 회귀도 추가했습니다.
+- 프로덕션 빌드: `API_ORIGIN=http://127.0.0.1:18080 npm run build` 성공.
+- `git diff --check` 통과, 프런트 CSS의 직접 자기 참조 토큰 0건.
+- 브라우저 검사를 `/requests`, `/requests/new`, 분석 전송 전, 상세 시안, 모바일·다크 화면으로 확장했습니다. 실제 계산된 카드·테두리·배경·선택 메뉴·주요 버튼 색과 로고 로드를 검사합니다.
+- 문서 없이 작성해 질문으로 진입하는 흐름, 선택 파일이 초안 생성 뒤에도 유지되며 명시적 분석 클릭 전에는 서버 분석 이력이 생기지 않는 흐름, 화면 설정 모달을 닫은 뒤 계정 버튼으로 초점이 돌아가는 흐름을 검사에 포함했습니다.
+
+이 항목은 로컬 명령 실행과 검사 범위를 설명합니다. 현재 커밋의 CI 실행 결과·스크린샷 직접 검토 결과는 [PR #2](https://github.com/team-khfc/Security-Advisor/pull/2)에서 해당 커밋과 함께 기록합니다. 과거 실행 #2의 Chromium 20건 통과는 이번 시각 변경의 통과 증거가 아니며, 전체 접근성 인증이나 픽셀 단위 동일성을 의미하지 않습니다.
+
 ## 실제 실행 결과
 
-| 검사 | 환경·명령 | 관찰한 결과 |
-|---|---|---|
-| 백엔드 전체 검사·빌드 | Java 25, Boot 4.1.2, 새 disposable PostgreSQL 17.11 + pgvector 0.8.0; 설치된 Gradle 9.1.0 바이너리로 `gradle --no-daemon spotlessApply check bootJar` | **105 tests, 실패 0·오류 0·스킵 0**, Spotless·ArchUnit·JAR 빌드 성공 |
-| 프런트 형식·타입·lint·단위 검사 | `npm run format`, `npm run check` | Prettier·TypeScript·ESLint 통과, **Vitest 3파일 19건 통과** |
-| 프런트 production build | Next.js 16.4.5, `API_ORIGIN=http://127.0.0.1:18080 npm run build` | 빌드 성공, 정적 생성 14/14 |
-| 실제 HTTP 통합 | 실제 Java 25 JAR + Next.js production 서버 + 별도 PostgreSQL 17.11/pgvector; 프런트 `/api` 프록시 경유 | **10개 시나리오 그룹 통과** |
-| 런타임 DB 권한 | 실제 `securityadvisor_app` 계정 | DDL 거절 확인 |
-| 재시작 보존 | 백엔드 정상 종료·재시작 | 신청 건수 유지 확인 |
-| 실행 API 계약 | 실행 서버 `/v3/api-docs` | **35개 경로**, `docs/openapi.json`에 보관; 서버 URL만 `/`로 정규화 |
+| 검사                            | 환경·명령                                                                                                                                             | 관찰한 결과                                                          |
+| ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| 백엔드 전체 검사·빌드           | Java 25, Boot 4.1.2, 새 disposable PostgreSQL 17.11 + pgvector 0.8.0; 설치된 Gradle 9.1.0 바이너리로 `gradle --no-daemon spotlessApply check bootJar` | **105 tests, 실패 0·오류 0·스킵 0**, Spotless·ArchUnit·JAR 빌드 성공 |
+| 프런트 형식·타입·lint·단위 검사 | `npm run format`, `npm run check`                                                                                                                     | Prettier·TypeScript·ESLint 통과, **Vitest 3파일 19건 통과**          |
+| 프런트 production build         | Next.js 16.4.5, `API_ORIGIN=http://127.0.0.1:18080 npm run build`                                                                                     | 빌드 성공, 정적 생성 14/14                                           |
+| 실제 HTTP 통합                  | 실제 Java 25 JAR + Next.js production 서버 + 별도 PostgreSQL 17.11/pgvector; 프런트 `/api` 프록시 경유                                                | **10개 시나리오 그룹 통과**                                          |
+| 런타임 DB 권한                  | 실제 `securityadvisor_app` 계정                                                                                                                       | DDL 거절 확인                                                        |
+| 재시작 보존                     | 백엔드 정상 종료·재시작                                                                                                                               | 신청 건수 유지 확인                                                  |
+| 실행 API 계약                   | 실행 서버 `/v3/api-docs`                                                                                                                              | **35개 경로**, `docs/openapi.json`에 보관; 서버 URL만 `/`로 정규화   |
 
 백엔드 결과는 실제 PostgreSQL을 사용하는 **외부 전용 검사 DB 경로**입니다. H2나 저장소 대역으로 바꾸지 않았으며, Docker의 Testcontainers 실행 결과로 집계하지 않습니다. 외부 검사 DB도 매번 새 DB를 만들어 실행했으며 생성된 로그인 암호·암호화 키를 재사용하지 않았습니다.
 
@@ -50,16 +62,16 @@
 
 ## 실행하지 못했거나 별도 검증이 필요한 범위
 
-| 범위 | 상태·이유 | 다음 확인 경로 |
-|---|---|---|
-| 로컬 Docker 이미지 빌드·Compose 전체 기동 | 로컬은 **미검증**. GitHub 실행 #1의 빌드·기동·HTTP는 성공 | 현재 커밋의 GitHub CI compose 작업 |
-| Testcontainers 경로 | 로컬은 **미검증**. GitHub 실행 #1의 backend 작업 성공 | 현재 커밋의 GitHub CI backend 작업 |
-| 로컬 Chromium 실제 화면 검사 | **실행 실패**. Chromium Unix 소켓이 제한되고 권한 확대 요청도 자동 정책에서 거절됨 | CI의 `scripts/browser-smoke.mjs` |
-| GitHub Actions 실행 | 최초 실행의 부분 결과는 위 기록에 명시 | 현재 결과는 해당 PR의 커밋별 CI 실행 |
-| 외부 LLM 2종 실호출·교체 구동 | **미검증**. 실제 키 미제공 | 승인된 키·모델로 별도 실행 증거 |
-| 외부 임베딩 모델 RAG·원문 전체 색인 | **미구현/미검증** | 자료·모델·검색 품질 수용 기준 먼저 확정 |
-| 전체 접근성·스크린리더·대비·확대·여러 OS/브라우저 | **미검증** | 설계 수용 기준에 따른 수동·도구 검사 |
-| 운영 SSO·기관 실계정·장비 적용 | **미구현** | 1차 범위·기관 승인에 따른 후속 결정 |
+| 범위                                              | 상태·이유                                                                          | 다음 확인 경로                          |
+| ------------------------------------------------- | ---------------------------------------------------------------------------------- | --------------------------------------- |
+| 로컬 Docker 이미지 빌드·Compose 전체 기동         | 로컬은 **미검증**. GitHub 실행 #1의 빌드·기동·HTTP는 성공                          | 현재 커밋의 GitHub CI compose 작업      |
+| Testcontainers 경로                               | 로컬은 **미검증**. GitHub 실행 #1의 backend 작업 성공                              | 현재 커밋의 GitHub CI backend 작업      |
+| 로컬 Chromium 실제 화면 검사                      | **실행 실패**. Chromium Unix 소켓이 제한되고 권한 확대 요청도 자동 정책에서 거절됨 | CI의 `scripts/browser-smoke.mjs`        |
+| GitHub Actions 실행                               | 최초 실행의 부분 결과는 위 기록에 명시                                             | 현재 결과는 해당 PR의 커밋별 CI 실행    |
+| 외부 LLM 2종 실호출·교체 구동                     | **미검증**. 실제 키 미제공                                                         | 승인된 키·모델로 별도 실행 증거         |
+| 외부 임베딩 모델 RAG·원문 전체 색인               | **미구현/미검증**                                                                  | 자료·모델·검색 품질 수용 기준 먼저 확정 |
+| 전체 접근성·스크린리더·대비·확대·여러 OS/브라우저 | **미검증**                                                                         | 설계 수용 기준에 따른 수동·도구 검사    |
+| 운영 SSO·기관 실계정·장비 적용                    | **미구현**                                                                         | 1차 범위·기관 승인에 따른 후속 결정     |
 
 CI는 새 환경에서 형식·타입·lint·단위·ArchUnit·Testcontainers·production build와 Compose HTTP·Chromium 검사를 수행하도록 구성했습니다. workflow 파일만으로 GitHub 실행 통과를 주장하지 않습니다. 브라우저 artifact는 합성 화면 PNG와 결과 JSON만 수집하며 .env·쿠키·API 키·raw 서버 로그를 업로드하지 않습니다.
 

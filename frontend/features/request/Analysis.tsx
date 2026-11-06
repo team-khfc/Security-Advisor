@@ -6,16 +6,7 @@ import { useSession, useMemoryDraft } from '@/features/auth';
 import { analysisSchema, type Analysis, type SecurityRequest } from './types';
 import { requestJson } from '@/lib/http';
 import { formatAnswerValue, formatDate } from '@/lib/format';
-import {
-  Badge,
-  ErrorNotice,
-  FormHelp,
-  Heading,
-  Icon,
-  Modal,
-  Notice,
-  Stepper,
-} from '@/components/ui';
+import { Badge, ErrorNotice, Heading, Icon, Modal, Notice } from '@/components/ui';
 import { useAnalyses, useRequestMutation } from './useRequests';
 
 export const EXAMPLE_PLAN =
@@ -62,6 +53,7 @@ export function AnalysisView({
   const [fileError, setFileError] = useState<string>();
   const [fullName, setFullName] = useState(false);
   const [transmitted, setTransmitted] = useState(false);
+  const [analysisFailed, setAnalysisFailed] = useState(false);
   const [confirm, setConfirm] = useState<Analysis>();
   const fileRef = useRef<HTMLInputElement>(null);
   const locked = preview || !procedure.allowedActions.includes('ANALYZE');
@@ -69,100 +61,51 @@ export function AnalysisView({
   async function start() {
     if (!onAnalyze) return;
     setAttempted(true);
+    setTransmitted(false);
+    setAnalysisFailed(false);
     try {
       await onAnalyze(text, file);
       setTransmitted(true);
     } catch {
+      setAnalysisFailed(true);
       /* 오류는 API 요청을 소유한 컨테이너에서 표시한다. */
     }
   }
   return (
     <>
-      <Heading
-        title="새 보안 신청"
-        description="사업 설명부터 차근차근, 필요한 정보는 담당자와 함께 확인합니다."
-      >
+      <Heading title={`${procedure.title} 이어서 작성`}>
         <Badge tone="blue">기관 설정 v{procedure.policyVersion}</Badge>
       </Heading>
-      <Stepper current={0} />
-      <div className="form-layout">
-        <div className="form-main">
-          <section className="sf-panel form-panel">
-            <div className="section-heading">
-              <span className="section-num">02</span>
-              <div>
-                <h2>자료와 정보 후보를 확인해 주세요</h2>
-                <p>파일을 선택한 뒤 분석을 요청하거나 직접 입력할 수 있습니다.</p>
-              </div>
-            </div>
-            <Notice>
-              {preview
-                ? '읽기전용 시안입니다. 아래 내용은 합성 계획서와 정보 후보이며 파일이나 답변을 전송하지 않습니다.'
-                : '분석 요청 시 최신 기관 모델 연결을 사용합니다. 실행 결과에서 예시 모드와 실제 모델 응답을 확인하세요. 합성 자료만 전송해 주세요.'}
-            </Notice>
-            <ErrorNotice error={error} />
-            <div className="upload-area">
-              <Icon name="upload" width={36} height={36} />
-              <strong>사업계획서 또는 서비스 개요서</strong>
-              <p>UTF-8 TXT·MD · 1MiB 이하 · 파일 1개 · 직접 입력과 합계 40,000자 이하</p>
-              <button
-                className="button"
-                type="button"
-                disabled={locked || busy}
-                onClick={() => fileRef.current?.click()}
-              >
-                파일 선택
-              </button>
-              <input
-                ref={fileRef}
-                className="file-native"
-                type="file"
-                accept=".txt,.md,text/plain,text/markdown"
-                aria-label="사업 자료 파일 선택"
-                disabled={locked || busy}
-                onChange={(event) => {
-                  const next = event.target.files?.[0];
-                  if (!next) return;
-                  const issue = validateAnalysisFile(next);
-                  setFileError(issue ?? undefined);
-                  if (!issue) {
-                    setFile(next);
-                    setTransmitted(false);
-                    setAttempted(false);
-                  } else {
-                    setFile(undefined);
-                    event.target.value = '';
-                  }
-                }}
-              />
-              <button
-                className="text-button"
-                type="button"
-                disabled={locked || busy}
-                onClick={() => setText(EXAMPLE_PLAN)}
-              >
-                합성 예시 계획서 입력
-              </button>
-            </div>
-            {fileError && <Notice error>{fileError}</Notice>}
+      <section className="docbar" aria-label="첨부 문서">
+        <div className="docbar-in">
+          <div className="dchips">
+            <Icon name="file" />
+            {file ? (
+              <span className={fullName ? 'fname full' : 'fname'}>{file.name}</span>
+            ) : (
+              <span className="help">
+                첨부 문서 없음. 자료를 추가하거나 사업 설명을 입력해 주세요.
+              </span>
+            )}
             {file && (
-              <div className="file-row">
-                <Icon name="file" />
-                <div className="file-info">
-                  <span className={fullName ? 'inline-file-name' : 'file-name'}>{file.name}</span>
-                  <small>
-                    {file.size.toLocaleString()}B ·{' '}
-                    {busy
-                      ? '전송 및 분석 중'
-                      : transmitted
-                        ? '서버 전송 및 분석 완료'
-                        : attempted
-                          ? '전송 시도됨 · 분석 이력 확인'
-                          : '선택됨 · 아직 전송하지 않음'}
-                  </small>
-                </div>
+              <Badge tone={busy ? 'blue' : analysisFailed ? 'red' : transmitted ? 'green' : 'gray'}>
+                {busy
+                  ? '전송 및 분석 중'
+                  : analysisFailed
+                    ? '분석 실패'
+                    : transmitted
+                      ? '분석 완료'
+                      : attempted
+                        ? '분석 이력 확인'
+                        : '선택됨 · 아직 전송하지 않음'}
+              </Badge>
+            )}
+          </div>
+          <div className="btn-row">
+            {file && (
+              <>
                 <button
-                  className="text-button"
+                  className="btn btn-tertiary btn-sm"
                   type="button"
                   onClick={() => setFullName(!fullName)}
                   aria-expanded={fullName}
@@ -170,18 +113,106 @@ export function AnalysisView({
                   {fullName ? '이름 접기' : '전체 이름 보기'}
                 </button>
                 <button
-                  className="icon-button"
+                  className="btn btn-tertiary btn-sm"
                   type="button"
-                  aria-label="선택한 파일 제거"
-                  disabled={busy}
+                  disabled={locked || busy}
                   onClick={() => {
                     setFile(undefined);
                     setTransmitted(false);
+                    setAnalysisFailed(false);
+                    setAttempted(false);
                     if (fileRef.current) fileRef.current.value = '';
                   }}
                 >
-                  <Icon name="close" />
+                  파일 빼기
                 </button>
+              </>
+            )}
+            <button
+              className="btn btn-sm"
+              type="button"
+              disabled={locked || busy}
+              onClick={() => fileRef.current?.click()}
+            >
+              {file ? '파일 변경' : '문서 추가'}
+            </button>
+          </div>
+        </div>
+      </section>
+      <input
+        ref={fileRef}
+        className="file-native"
+        type="file"
+        accept=".txt,.md,text/plain,text/markdown"
+        aria-label="사업 자료 파일 선택"
+        disabled={locked || busy}
+        onChange={(event) => {
+          const next = event.target.files?.[0];
+          if (!next) return;
+          const issue = validateAnalysisFile(next);
+          setFileError(issue ?? undefined);
+          if (!issue) {
+            setFile(next);
+            setTransmitted(false);
+            setAnalysisFailed(false);
+            setAttempted(false);
+          } else {
+            setFile(undefined);
+            event.target.value = '';
+          }
+        }}
+      />
+      <div className="work app-analysis">
+        <section className="chatp" aria-labelledby="analysis-assistant-title">
+          <div className="chatp-h">
+            <div className="ttl">
+              <span className="av" aria-hidden="true">
+                AI
+              </span>
+              <h2 className="h-panel" id="analysis-assistant-title">
+                보안정보 도우미
+              </h2>
+            </div>
+            <span className="meta">AI 답변은 제안이며 확정 전 확인이 필요합니다</span>
+          </div>
+          <div className="msgs" tabIndex={0} aria-label="자료와 분석 요청">
+            <div className="m-ai">
+              <span className="av" aria-hidden="true">
+                AI
+              </span>
+              <div className="body">
+                <div className="bubble">
+                  <p>사업 설명에서 필요한 보안정보를 함께 찾아볼게요.</p>
+                  <p>
+                    자료를 선택한 뒤 분석을 시작하면 원문 근거와 정보 후보가 오른쪽에 표시됩니다.
+                    자료가 없으면 직접 답변할 수 있습니다.
+                  </p>
+                </div>
+                <p className="m-src">자료 준비 안내 · 분석은 아래 버튼을 누를 때 실행됩니다.</p>
+              </div>
+            </div>
+            {preview && (
+              <Notice>
+                합성 자료로 구성한 읽기전용 시안입니다. 자료나 답변을 전송하지 않습니다.
+              </Notice>
+            )}
+            <ErrorNotice error={error} />
+            {fileError && <Notice error>{fileError}</Notice>}
+            {!file && (
+              <div className="dropzone analysis-dropzone">
+                <span className="dz-ic">
+                  <Icon name="upload" width={32} height={32} />
+                </span>
+                <h3 className="h-panel">사업계획서 또는 서비스 개요서</h3>
+                <button
+                  className="btn"
+                  type="button"
+                  disabled={locked || busy}
+                  onClick={() => fileRef.current?.click()}
+                >
+                  파일 선택
+                </button>
+                <p className="help">UTF-8 TXT·MD · 1MiB 이하 · 파일 1개</p>
               </div>
             )}
             <div className="sf-field">
@@ -198,26 +229,59 @@ export function AnalysisView({
                 placeholder="사업 목적, 이용 대상, 처리 정보, 운영 기간을 적어 주세요."
               />
               <span className="char-count">{text.length.toLocaleString()} / 20,000자</span>
+              <p className="help">파일과 직접 입력을 합해 40,000자까지 분석할 수 있습니다.</p>
             </div>
-            <div className="analysis-actions">
-              <button
-                className="button"
-                type="button"
-                disabled={locked || busy || (!file && !text.trim())}
-                onClick={() => void start()}
-              >
-                <Icon name="sparkle" />
-                {busy ? '분석 요청 처리 중…' : '파일 전송 및 AI 분석 시작'}
-              </button>
+            <button
+              className="btn btn-tertiary"
+              type="button"
+              disabled={locked || busy}
+              onClick={() => setText(EXAMPLE_PLAN)}
+            >
+              합성 예시 계획서 입력
+            </button>
+          </div>
+          <div className="infop-f">
+            <button
+              className="btn btn-primary btn-block"
+              type="button"
+              disabled={locked || busy || (!file && !text.trim())}
+              onClick={() => void start()}
+            >
+              <Icon name="sparkle" />
+              {busy
+                ? '분석 요청 처리 중…'
+                : file
+                  ? '파일 전송 및 AI 분석 시작'
+                  : '사업 설명 AI 분석 시작'}
+            </button>
+            <p className="help">
+              파일 선택만으로는 전송하지 않습니다. 실제 개인정보와 내부 자료는 넣지 마세요.
+            </p>
+          </div>
+        </section>
+        <div className="work-divider" aria-hidden="true" />
+        <aside className="infop" aria-labelledby="analysis-information-title">
+          <div className="infop-h">
+            <div className="row">
+              <h2 className="h-panel" id="analysis-information-title">
+                수집된 보안정보
+              </h2>
+              <span className="help">정보 후보 {latest?.suggestions.length ?? 0}개</span>
+            </div>
+          </div>
+          <div className="infop-b">
+            <div className="irow namerow">
+              <span className="k">사업명</span>
+              <strong>{procedure.title}</strong>
             </div>
             {latest ? (
               <>
-                <div className="row-between">
-                  <h3>분석 정보 후보</h3>
+                <h3 className="grp">
+                  <span>문서에서 찾은 정보</span>
                   <Badge tone={latest.mode === 'EXAMPLE' ? 'gray' : 'blue'}>
                     {latest.mode === 'EXAMPLE' ? '예시 분석' : '실제 모델 연결'}
                   </Badge>
-                </div>
+                </h3>
                 <p className="source-meta">
                   {latest.provider} · {latest.model} · {formatDate(latest.createdAt, true)} · 수정본
                   v{latest.revision}
@@ -233,82 +297,78 @@ export function AnalysisView({
                   </Notice>
                 )}
                 {latest.suggestions.map((suggestion) => (
-                  <div className="ai-candidate" key={suggestion.key}>
-                    <div className="row-between">
-                      <h3>{suggestion.label}</h3>
+                  <div className="drow" key={suggestion.key}>
+                    <div className="drow-top">
+                      <span className="k">{suggestion.label}</span>
                       <Badge tone="amber">AI 제안 · 미확정</Badge>
                     </div>
-                    <p className="evidence">근거: {suggestion.evidence}</p>
-                    <p className="readonly-value">
+                    <p className="drow-v readonly-value">
                       {formatAnswerValue(suggestion.key, suggestion.value)}
+                    </p>
+                    <p className="evi">
+                      <Icon name="file" width={16} height={16} />
+                      <span>근거: {suggestion.evidence}</span>
                     </p>
                   </div>
                 ))}
-                {latest.suggestions.length > 0 && (
-                  <div className="analysis-actions">
-                    <button
-                      className="button"
-                      type="button"
-                      disabled={
-                        locked ||
-                        busy ||
-                        latest.status !== 'SUCCEEDED' ||
-                        latest.revision !== procedure.revision
-                      }
-                      onClick={() => setConfirm(latest)}
-                    >
-                      정보 후보를 답변 초안에 적용
-                    </button>
-                  </div>
-                )}
                 {latest.revision !== procedure.revision && (
-                  <p className="field-hint">
+                  <p className="help">
                     현재 수정본과 분석 시점이 다릅니다. 이미 적용했거나 내용을 수정한 경우 새로
                     분석해야 합니다.
                   </p>
                 )}
                 {latest.references.length > 0 && (
-                  <div className="source-meta">
-                    <strong>참고한 공개 자료</strong>
+                  <>
+                    <h3 className="grp">참고한 공개 자료</h3>
                     {latest.references.map((reference) => (
-                      <p key={`${reference.title}-${reference.section}`}>
+                      <p className="help" key={`${reference.title}-${reference.section}`}>
                         {reference.title} · {reference.version} · {reference.section}
                       </p>
                     ))}
-                  </div>
+                  </>
                 )}
               </>
             ) : (
-              <Notice>
-                분석 결과는 아직 없습니다. 자료 없이 다음 단계에서 직접 답변해도 됩니다.
-              </Notice>
+              <>
+                <h3 className="grp">문서에서 찾은 정보</h3>
+                <p className="help">
+                  분석 결과가 아직 없습니다. 분석을 시작하거나 질문에 직접 답해 주세요.
+                </p>
+              </>
             )}
-          </section>
-          <div className="form-actions">
-            {preview ? (
-              <Link className="button primary" href="/design-preview/interview">
-                AI 인터뷰 화면 보기
-                <Icon name="arrow" />
-              </Link>
-            ) : (
-              <Link className="button primary" href={`/requests/${procedure.id}/questions`}>
-                AI 인터뷰 계속
-                <Icon name="arrow" />
-              </Link>
+            <h3 className="grp">담당자 확인 항목</h3>
+            <p className="help">
+              서버·IP·포트는 ICT인프라 담당자가, 보안 요건은 정보보안 담당자가 확인합니다.
+            </p>
+          </div>
+          <div className="infop-f">
+            {latest && latest.suggestions.length > 0 && (
+              <button
+                className="btn btn-block"
+                type="button"
+                disabled={
+                  locked ||
+                  busy ||
+                  latest.status !== 'SUCCEEDED' ||
+                  latest.revision !== procedure.revision
+                }
+                onClick={() => setConfirm(latest)}
+              >
+                정보 후보를 답변 초안에 적용
+              </button>
             )}
             <Link
-              className="button subtle"
-              href={preview ? '/design-preview/requests' : '/requests'}
+              className="btn btn-primary btn-block"
+              href={preview ? '/design-preview/interview' : `/requests/${procedure.id}/questions`}
             >
-              <Icon name="back" />
-              신청 목록
+              {preview ? 'AI 인터뷰 화면 보기' : 'AI 인터뷰 계속'}
+              <Icon name="arrow" />
             </Link>
+            <p className="help">
+              후보 적용 후에도 미확정 상태입니다. 원문과 답변을 직접 확인해 주세요.
+            </p>
           </div>
-          <p className="save-status">
-            AI 후보 적용과 답변 확정은 별도 단계입니다. 내부 IP·서버 정보는 담당자가 입력합니다.
-          </p>
-        </div>
-        <FormHelp />
+        </aside>
       </div>
       <Modal
         open={Boolean(confirm)}

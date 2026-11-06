@@ -1,11 +1,12 @@
 'use client';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSession, useMemoryDraft } from '@/features/auth';
 import { requestSchema, type SecurityRequest } from './types';
 import { requestJson } from '@/lib/http';
+import { writeDraft } from '@/lib/draft';
 import { documentLabel, formatDate, shortId, stepPath } from '@/lib/format';
 import {
   Heading,
@@ -22,8 +23,8 @@ import {
 import { useRequests, useRequest, useRequestMutation } from './useRequests';
 import { WorkspaceView, RequestsView, DEFAULT_REQUEST_FILTERS } from './Overview';
 import { AnswerEditor } from './AnswerEditor';
-import { AnalysisPage } from './Analysis';
-import { DetailView } from './Details';
+import { AnalysisPage, validateAnalysisFile } from './Analysis';
+import { CollectedInformation, DetailView } from './Details';
 import {
   ReviewPanel,
   SubmitPanel,
@@ -32,7 +33,7 @@ import {
   ReturnNotice,
   TerminalNotice,
 } from '@/features/review';
-import { DocumentPanel, DocumentPreview } from '@/features/document';
+import { DocumentPanel } from '@/features/document';
 import { FinalDraftPanel, StaffAssistant } from '@/features/llm';
 import { NetworkEditor, NetworkTable } from './Network';
 
@@ -113,6 +114,82 @@ export function RequestsPage({ initialQuery = '' }: { initialQuery?: string }) {
   );
 }
 
+/** 실제 작성과 공개 시안이 같은 업로드 시작 화면을 쓰되 시안에서는 파일을 받지 않는다. */
+export function NewRequestIntake({
+  preview = false,
+  error,
+  onChooseFile,
+  onFileDrop,
+  onStart,
+}: {
+  preview?: boolean;
+  error?: string;
+  onChooseFile?: () => void;
+  onFileDrop?: (files: FileList) => void;
+  onStart?: () => void;
+}) {
+  const [dragging, setDragging] = useState(false);
+  return (
+    <section className="intake" aria-labelledby="intake-title">
+      <div
+        className={`dropzone${dragging ? ' drag' : ''}`}
+        onDragOver={(event) => {
+          event.preventDefault();
+          if (!preview) setDragging(true);
+        }}
+        onDragLeave={() => setDragging(false)}
+        onDrop={(event) => {
+          event.preventDefault();
+          setDragging(false);
+          if (!preview) onFileDrop?.(event.dataTransfer.files);
+        }}
+      >
+        <span className="dz-ic">
+          <Icon name="upload" width={40} height={40} />
+        </span>
+        <h2 className="h-panel" id="intake-title">
+          기획서를 끌어다 놓으세요
+        </h2>
+        <p className="help">기획서나 서비스 설명에서 필요한 보안정보를 함께 정리합니다.</p>
+        {preview ? (
+          <Link className="btn" href="/design-preview/analysis">
+            자료 분석 시안 보기
+          </Link>
+        ) : (
+          <button
+            type="button"
+            className="btn"
+            onClick={onChooseFile}
+            aria-describedby="intake-file-help"
+          >
+            파일 선택
+          </button>
+        )}
+        <p className="help" id="intake-file-help">
+          UTF-8 TXT·MD · 1MiB 이하 · 파일 1개
+        </p>
+        <p className="help">
+          {preview
+            ? '파일을 전송하지 않는 합성 시안입니다.'
+            : '선택한 파일은 분석 시작을 누르기 전까지 전송되지 않습니다.'}
+        </p>
+      </div>
+      {error && <Notice error>{error}</Notice>}
+      <div className="intake-actions">
+        {preview ? (
+          <Link className="btn btn-tertiary" href="/design-preview/interview">
+            기획서 없이 대화로 시작
+          </Link>
+        ) : (
+          <button type="button" className="btn btn-tertiary" onClick={onStart}>
+            기획서 없이 대화로 시작
+          </button>
+        )}
+      </div>
+    </section>
+  );
+}
+
 /** 새 신청은 명시적 초안 생성에서만 서버에 저장하며 AI가 내부 사실을 채우지 않는다. */
 export function CreatePage() {
   const { user } = useSession();
@@ -124,6 +201,26 @@ export function CreatePage() {
     department: '',
     description: '',
   });
+  const [material, setMaterial, clearMaterial] = useMemoryDraft<{ file?: File }>(
+    'new-request-material',
+    {},
+  );
+  const [started, setStarted] = useState(Boolean(draft.title || material.file));
+  const [fileError, setFileError] = useState<string>();
+  const fileRef = useRef<HTMLInputElement>(null);
+  const titleRef = useRef<HTMLInputElement>(null);
+  function begin() {
+    setStarted(true);
+    requestAnimationFrame(() => titleRef.current?.focus());
+  }
+  function chooseFile(file?: File) {
+    if (!file) return;
+    const issue = validateAnalysisFile(file);
+    setFileError(issue ?? undefined);
+    if (issue) return;
+    setMaterial({ file });
+    begin();
+  }
   const mutation = useMutation({
     mutationFn: () =>
       requestJson('/security-requests', requestSchema, {
@@ -131,229 +228,280 @@ export function CreatePage() {
         body: JSON.stringify(draft),
       }),
     onSuccess: (procedure) => {
+      if (material.file) {
+        writeDraft(`${user.institutionId}:${user.userId}`, `analysis-input:${procedure.id}`, {
+          text: '',
+          file: material.file,
+        });
+      }
       clear();
+      clearMaterial();
       void client.invalidateQueries({ queryKey: ['requests'] });
-      router.push(`/requests/${procedure.id}/analysis`);
+      router.push(`/requests/${procedure.id}/${material.file ? 'analysis' : 'questions'}`);
     },
   });
   if (user.role !== 'APPLICANT')
     return <Notice>새 보안 신청은 일반 사용자 계정으로 작성해 주세요.</Notice>;
   return (
     <>
-      <Heading
-        title="새 보안 신청"
-        description="사업 설명부터 차근차근, 필요한 정보는 담당자와 함께 확인합니다."
+      <Heading title="새 신청" />
+      <input
+        ref={fileRef}
+        className="file-native"
+        type="file"
+        accept=".txt,.md,text/plain,text/markdown"
+        aria-label="사업 자료 파일 선택"
+        disabled={mutation.isPending}
+        onChange={(event) => {
+          chooseFile(event.target.files?.[0]);
+          event.target.value = '';
+        }}
       />
-      <Stepper current={0} />
-      <div className="form-layout">
-        <form
-          className="form-main"
-          onSubmit={(event) => {
-            event.preventDefault();
-            mutation.mutate();
+      {!started ? (
+        <NewRequestIntake
+          error={fileError}
+          onChooseFile={() => fileRef.current?.click()}
+          onStart={begin}
+          onFileDrop={(files) => {
+            if (files.length > 1) {
+              setFileError('한 번에 파일 1개를 선택해 주세요.');
+              return;
+            }
+            chooseFile(files[0]);
           }}
-        >
-          <section className="sf-panel form-panel">
-            <div className="section-heading">
-              <span className="section-num">01</span>
-              <div>
-                <h2>어떤 사업을 준비하고 있나요?</h2>
-                <p>지금 알고 있는 내용을 편하게 적어 주세요.</p>
+        />
+      ) : (
+        <div className="request-setup intake">
+          <section className="docbar" aria-label="첨부 문서">
+            <div className="docbar-in">
+              <div className="dchips">
+                <Icon name="file" />
+                <span>{material.file?.name ?? '기획서 없이 대화로 작성합니다.'}</span>
+                {material.file && <Badge>선택됨 · 아직 전송하지 않음</Badge>}
+              </div>
+              <div className="btn-row">
+                <button
+                  type="button"
+                  className="btn btn-sm"
+                  disabled={mutation.isPending}
+                  onClick={() => fileRef.current?.click()}
+                >
+                  {material.file ? '파일 변경' : '문서 추가'}
+                </button>
+                {material.file && (
+                  <button
+                    type="button"
+                    className="btn btn-tertiary btn-sm"
+                    disabled={mutation.isPending}
+                    onClick={() => setMaterial({})}
+                  >
+                    파일 빼기
+                  </button>
+                )}
               </div>
             </div>
-            <ErrorNotice error={mutation.error} />
-            <div className="sf-field">
-              <label id="document-type-label">
-                작성할 서류 <span className="required">필수</span>
-              </label>
-              <div
-                className="document-choice"
-                role="radiogroup"
-                aria-labelledby="document-type-label"
-              >
-                {[
-                  ['FIREWALL', '방화벽 신청서', '서비스·시스템 간 통신이 필요할 때'],
-                  ['SECURITY_REVIEW', '보안성검토 신청서', '정보화 사업의 보안 요건을 검토할 때'],
-                ].map(([value, label, description]) => (
-                  <label key={value} className={draft.documentType === value ? 'selected' : ''}>
-                    <input
-                      type="radio"
-                      name="document-type"
-                      value={value}
-                      checked={draft.documentType === value}
-                      disabled={mutation.isPending}
-                      onChange={() => setDraft({ ...draft, documentType: value })}
-                    />
-                    <span>
-                      <strong>{label}</strong>
-                      <small>{description}</small>
-                    </span>
-                  </label>
-                ))}
-              </div>
-            </div>
-            <div className="sf-field">
-              <label htmlFor="project-title">
-                사업명 <span className="required">필수</span>
-              </label>
-              <p className="field-hint" id="title-hint">
-                어떤 사업인지 알 수 있는 이름을 입력해 주세요.
-              </p>
-              <input
-                id="project-title"
-                required
-                maxLength={160}
-                aria-describedby="title-hint"
-                disabled={mutation.isPending}
-                value={draft.title}
-                onChange={(event) => setDraft({ ...draft, title: event.target.value })}
-                placeholder="예: 공개 안내 챗봇 서비스 구축 (합성)"
-              />
-              <span className="char-count">{draft.title.length} / 160자</span>
-            </div>
-            <div className="sf-field">
-              <label htmlFor="department">
-                신청 부서 <span className="required">필수</span>
-              </label>
-              <input
-                id="department"
-                required
-                maxLength={100}
-                disabled={mutation.isPending}
-                value={draft.department}
-                onChange={(event) => setDraft({ ...draft, department: event.target.value })}
-                placeholder="합성 부서명"
-              />
-            </div>
-            <div className="sf-field">
-              <label htmlFor="description">
-                서비스 설명 <span className="required">필수</span>
-              </label>
-              <p className="field-hint" id="description-hint">
-                이용 대상과 제공하려는 서비스, 현재 정해진 범위를 알려 주세요.
-              </p>
-              <textarea
-                id="description"
-                rows={6}
-                maxLength={20000}
-                required
-                aria-describedby="description-hint"
-                disabled={mutation.isPending}
-                value={draft.description}
-                onChange={(event) => setDraft({ ...draft, description: event.target.value })}
-                placeholder="어떤 서비스를 누구에게 제공하고 싶나요?"
-              />
-              <span className="char-count">
-                {draft.description.length.toLocaleString()} / 20,000자
-              </span>
-            </div>
-            <button
-              type="button"
-              className="text-button"
-              disabled={mutation.isPending}
-              onClick={() =>
-                setDraft({
-                  ...draft,
-                  title: '공개 주택연금 안내 챗봇 (합성)',
-                  department: '디지털서비스팀 (합성)',
-                  description:
-                    '공개된 주택연금 안내 자료를 검색해 일반 국민에게 안내하는 챗봇을 준비합니다. 실제 개인정보와 내부 시스템 정보는 사용하지 않습니다. 합성 질문과 공개 FAQ로 시연합니다.',
-                })
-              }
-            >
-              합성 작성 예시 채우기
-            </button>
           </section>
-          <div className="form-actions">
-            <button className="button primary" type="submit" disabled={mutation.isPending}>
-              {mutation.isPending ? '초안 생성 중…' : '초안 생성 후 다음 단계'}
-              <Icon name="arrow" />
-            </button>
-            <Link className="button subtle" href="/requests">
-              <Icon name="back" />
-              목록으로
-            </Link>
-          </div>
-          <p className="save-status">초안 생성 버튼을 누르면 사업 정보를 서버에 저장합니다.</p>
-        </form>
-        <FormHelp />
-      </div>
+          {fileError && <Notice error>{fileError}</Notice>}
+          <form
+            className="form-main"
+            onSubmit={(event) => {
+              event.preventDefault();
+              mutation.mutate();
+            }}
+          >
+            <section className="card form-panel">
+              <div className="card-h">
+                <div>
+                  <h2 className="h-panel">먼저 신청 정보를 알려 주세요</h2>
+                  <p className="help">
+                    사업 정보를 저장한 뒤{' '}
+                    {material.file
+                      ? '자료 분석과 질문을 이어갑니다.'
+                      : '도우미와 질문을 이어갑니다.'}
+                  </p>
+                </div>
+              </div>
+              <ErrorNotice error={mutation.error} />
+              <div className="sf-field">
+                <label id="document-type-label">
+                  작성할 서류 <span className="required">필수</span>
+                </label>
+                <div
+                  className="document-choice"
+                  role="radiogroup"
+                  aria-labelledby="document-type-label"
+                >
+                  {[
+                    ['FIREWALL', '방화벽 신청서', '서비스·시스템 간 통신이 필요할 때'],
+                    ['SECURITY_REVIEW', '보안성검토 신청서', '정보화 사업의 보안 요건을 검토할 때'],
+                  ].map(([value, label, description]) => (
+                    <label key={value} className={draft.documentType === value ? 'selected' : ''}>
+                      <input
+                        type="radio"
+                        name="document-type"
+                        value={value}
+                        checked={draft.documentType === value}
+                        disabled={mutation.isPending}
+                        onChange={() => setDraft({ ...draft, documentType: value })}
+                      />
+                      <span>
+                        <strong>{label}</strong>
+                        <small>{description}</small>
+                      </span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+              <div className="sf-field">
+                <label htmlFor="project-title">
+                  사업명 <span className="required">필수</span>
+                </label>
+                <p className="field-hint" id="title-hint">
+                  어떤 사업인지 알 수 있는 이름을 입력해 주세요.
+                </p>
+                <input
+                  ref={titleRef}
+                  id="project-title"
+                  required
+                  maxLength={160}
+                  aria-describedby="title-hint"
+                  disabled={mutation.isPending}
+                  value={draft.title}
+                  onChange={(event) => setDraft({ ...draft, title: event.target.value })}
+                  placeholder="예: 공개 안내 챗봇 서비스 구축 (합성)"
+                />
+                <span className="char-count">{draft.title.length} / 160자</span>
+              </div>
+              <div className="sf-field">
+                <label htmlFor="department">
+                  신청 부서 <span className="required">필수</span>
+                </label>
+                <input
+                  id="department"
+                  required
+                  maxLength={100}
+                  disabled={mutation.isPending}
+                  value={draft.department}
+                  onChange={(event) => setDraft({ ...draft, department: event.target.value })}
+                  placeholder="합성 부서명"
+                />
+              </div>
+              <div className="sf-field">
+                <label htmlFor="description">
+                  서비스 설명 <span className="required">필수</span>
+                </label>
+                <p className="field-hint" id="description-hint">
+                  이용 대상과 제공하려는 서비스, 현재 정해진 범위를 알려 주세요.
+                </p>
+                <textarea
+                  id="description"
+                  rows={6}
+                  maxLength={20000}
+                  required
+                  aria-describedby="description-hint"
+                  disabled={mutation.isPending}
+                  value={draft.description}
+                  onChange={(event) => setDraft({ ...draft, description: event.target.value })}
+                  placeholder="어떤 서비스를 누구에게 제공하고 싶나요?"
+                />
+                <span className="char-count">
+                  {draft.description.length.toLocaleString()} / 20,000자
+                </span>
+              </div>
+              <button
+                type="button"
+                className="text-button"
+                disabled={mutation.isPending}
+                onClick={() =>
+                  setDraft({
+                    ...draft,
+                    title: '공개 주택연금 안내 챗봇 (합성)',
+                    department: '디지털서비스팀 (합성)',
+                    description:
+                      '공개된 주택연금 안내 자료를 검색해 일반 국민에게 안내하는 챗봇을 준비합니다. 실제 개인정보와 내부 시스템 정보는 사용하지 않습니다. 합성 질문과 공개 FAQ로 시연합니다.',
+                  })
+                }
+              >
+                합성 작성 예시 채우기
+              </button>
+            </section>
+            <div className="form-actions">
+              <button className="button primary" type="submit" disabled={mutation.isPending}>
+                {mutation.isPending ? '초안 생성 중…' : '초안 생성 후 다음 단계'}
+                <Icon name="arrow" />
+              </button>
+              <Link className="button subtle" href="/requests">
+                <Icon name="back" />
+                목록으로
+              </Link>
+            </div>
+            <p className="save-status">초안 생성 버튼을 누르면 사업 정보를 서버에 저장합니다.</p>
+          </form>
+        </div>
+      )}
     </>
   );
 }
 function QuestionsPage({ procedure }: { procedure: SecurityRequest }) {
   return (
     <>
-      <Heading
-        title="AI 인터뷰·답변 확인"
-        description="사업 자료의 정보 후보와 질문을 살펴보고, 알고 있는 내용을 직접 확인하세요."
-      >
+      <Heading title={`${procedure.title} 이어서 작성`}>
         <Badge tone="blue">기관 설정 v{procedure.policyVersion}</Badge>
       </Heading>
-      <Stepper
-        current={procedure.stage - 1}
-        returned={procedure.returnItems.some((item) => item.status === 'OPEN')}
-      />
       <TerminalNotice procedure={procedure} />
       <ReturnNotice procedure={procedure} />
-      <div className="interview-layout">
-        <section className="sf-panel interview-panel">
-          <div className="interview-header">
-            <span className="ai-avatar">
-              <Icon name="sparkle" />
-            </span>
-            <div>
-              <h2>SecurityAdvisor와 함께 작성</h2>
-              <p>사업 목적부터 차근차근 확인합니다.</p>
-            </div>
-          </div>
-          <div className="interview-messages">
-            <div className="interview-intro">
-              <span className="ai-avatar">
-                <Icon name="sparkle" width={18} />
+      <section className="docbar" aria-label="자료와 분석">
+        <div className="docbar-in">
+          <span className="help">
+            <Icon name="file" /> 자료를 분석하거나 알고 있는 내용을 직접 답할 수 있습니다.
+          </span>
+          <Link className="btn btn-sm" href={`/requests/${procedure.id}/analysis`}>
+            문서·분석 결과
+          </Link>
+        </div>
+      </section>
+      <div className="work app-interview">
+        <section className="chatp" aria-labelledby="interview-title">
+          <div className="chatp-h">
+            <div className="ttl">
+              <span className="av" aria-hidden="true">
+                AI
               </span>
-              <div className="interview-bubble">
-                <p>사업 설명에서 찾은 정보 후보를 함께 확인해 볼까요?</p>
-                <p>
-                  각 질문 아래의 이유와 원문 근거를 읽고 답변해 주세요. 모르는 서버·IP·포트는
-                  담당자가 입력합니다.
-                </p>
-                <p className="source-meta">
-                  기관 질문 템플릿 기반 안내 · AI 분석 후보는 사람 확인 전까지 미확정
-                </p>
+              <h2 className="h-panel" id="interview-title">
+                보안정보 도우미
+              </h2>
+            </div>
+            <span className="meta">AI 답변은 제안이며 확정 전 확인이 필요합니다</span>
+          </div>
+          <div className="msgs" tabIndex={0} aria-label="질문과 답변 확인">
+            <div className="m-ai">
+              <span className="av" aria-hidden="true">
+                AI
+              </span>
+              <div className="body">
+                <div className="bubble">
+                  <p>신청에 필요한 보안정보를 함께 정리해 드릴게요.</p>
+                  <p>
+                    각 질문의 이유와 원문 근거를 읽고 답변해 주세요. 모르는 서버·IP·포트는 담당자가
+                    확인합니다.
+                  </p>
+                </div>
+                <p className="m-src">기관 질문 템플릿 기반 안내</p>
               </div>
             </div>
-            <AnswerEditor procedure={procedure} />
+            <div className="interview-answer-fields">
+              <AnswerEditor procedure={procedure} />
+            </div>
           </div>
         </section>
-        <aside className="sf-panel interview-information">
-          <div className="panel-heading">
-            <h2>현재 수집 정보</h2>
-            <Badge tone="amber">
-              확인 필요{' '}
-              {
-                procedure.answers.filter(
-                  (answer) => !['CONFIRMED', 'NOT_APPLICABLE'].includes(answer.status),
-                ).length
-              }
-              개
-            </Badge>
-          </div>
-          <DocumentPreview procedure={procedure} />
-        </aside>
+        <div className="work-divider" aria-hidden="true" />
+        <CollectedInformation procedure={procedure}>
+          <Link className="btn btn-primary btn-block" href={`/requests/${procedure.id}/summary`}>
+            저장 내용 확인 후 협의 요청
+          </Link>
+          <p className="help">수정한 답변은 먼저 ‘답변·확인 상태 저장’을 눌러 주세요.</p>
+        </CollectedInformation>
       </div>
-      <div className="form-actions">
-        <Link className="button primary" href={`/requests/${procedure.id}/summary`}>
-          저장 내용 확인 후 협의 요청
-          <Icon name="arrow" />
-        </Link>
-        <Link className="button" href={`/requests/${procedure.id}/analysis`}>
-          자료·AI 분석으로
-        </Link>
-      </div>
-      <p className="save-status">
-        화면 이동은 저장이 아닙니다. 수정한 답변은 먼저 ‘답변·확인 상태 저장’을 눌러 주세요.
-      </p>
     </>
   );
 }
