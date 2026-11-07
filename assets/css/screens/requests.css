@@ -38,9 +38,9 @@
 .tbl.rows-link .turn{margin-top:.4rem}
 /* 신청자 화면 담당자 열 */
 .asg{list-style:none;margin:0;padding:0;display:grid;gap:.4rem}
-.asg li{display:grid;grid-template-columns:6.4rem auto 1fr;align-items:center;gap:.8rem;font-size:1.5rem}
-.asg-f{color:var(--sf-muted);font-size:1.3rem}
-.asg-s{display:inline-flex;align-items:center;gap:.4rem;font-size:1.3rem;white-space:nowrap}
+.asg li{display:grid;grid-template-columns:7.2rem auto 1fr;align-items:center;gap:.8rem;font-size:1.5rem}
+.asg-f{color:var(--sf-muted);font-size:1.5rem;white-space:nowrap}
+.asg-s{display:inline-flex;align-items:center;gap:.4rem;font-size:1.7rem;white-space:nowrap}
 .asg-s::before{content:"";width:.7rem;height:.7rem;border-radius:50%;background:currentColor;flex:none}
 .asg-s.s-done{color:var(--sf-success-text)}
 .asg-s.s-now{color:var(--sf-primary-text)}
