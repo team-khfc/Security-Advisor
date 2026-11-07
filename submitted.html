@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="보안길잡이 AI: 공공기관 방화벽 신청서 작성·검토 협업 서비스">
+<title>제출 완료 | 보안길잡이 AI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/tokens.css">
+<link rel="stylesheet" href="assets/css/base.css">
+<link rel="stylesheet" href="assets/css/components.css">
+<!-- 이 화면은 전용 CSS 없이 공통 스타일만 씁니다 -->
+</head>
+<body data-view="submitted">
+<!-- shell:start | 공통 머리글·메뉴·바닥글입니다. 직접 고치지 말고 partials/shell.html을 고친 뒤 python tools/sync-shell.py 를 실행하세요. -->
+<a class="skip" href="#main">본문 바로가기</a>
+<header class="hd">
+  <div class="hd-in">
+    <button type="button" class="btn btn-tertiary mnav" id="btn-menu" aria-controls="side-nav" aria-expanded="false">메뉴</button>
+    <a class="logo" href="requests.html" aria-label="보안길잡이 AI 신청 현황으로">
+      <img class="logo-img logo-l" src="assets/img/logo.png" alt="보안길잡이 AI" width="208" height="48"><img class="logo-img logo-d" src="assets/img/logo-dark.png" alt="보안길잡이 AI" width="208" height="49">
+    </a>
+    <span class="org">한국주택금융공사</span>
+    <div class="ctx">
+      <div class="gsearch" role="search">
+        <label for="gq" class="sr-only">신청·화면 검색</label>
+        <svg class="gs-ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg>
+        <input id="gq" class="input" type="search" placeholder="신청·화면 검색" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="gq-list" aria-autocomplete="list" aria-describedby="gq-k">
+        <kbd id="gq-k" aria-label="단축키 Ctrl K">Ctrl K</kbd>
+        <ul class="glist" id="gq-list" role="listbox" aria-label="검색 결과" hidden></ul>
+      </div>
+      <div class="umenu-wrap">
+        <button type="button" class="ubtn" id="btn-user" aria-expanded="false" aria-controls="umenu"><span class="uav" id="u-av" aria-hidden="true"></span><span class="utxt"><b id="u-name"></b><span id="u-dept"></span></span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+        <div class="umenu" id="umenu" hidden><p class="meta" style="margin:0 0 .8rem">사용자 전환</p><ul id="u-list"></ul></div>
+      </div>
+      <div class="noti-wrap">
+        <button type="button" class="tbtn" id="btn-noti" aria-expanded="false" aria-controls="noti" aria-label="알림"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0112 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 003.4 0"/></svg><span class="ndot" id="noti-n" hidden></span></button>
+        <section class="noti" id="noti" hidden aria-labelledby="noti-h">
+          <div class="noti-h"><h2 class="h-panel" id="noti-h" tabindex="-1"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0112 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 003.4 0"/></svg>알림·협의 소식</h2>
+            <div class="btn-row"><button type="button" class="btn btn-tertiary btn-sm" id="noti-read">모두 읽음</button><button type="button" class="dlg-x" id="noti-x" aria-label="알림 닫기" style="position:static"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div></div>
+          <ul id="noti-list"></ul>
+          
+        </section>
+      </div>
+      <div class="fontsz" role="group" aria-label="글자 크기">
+        <button type="button" class="tbtn" id="fs-down" aria-label="글자 작게"><span aria-hidden="true" style="font-size:1.4rem;font-weight:700">가</span></button>
+        <button type="button" class="tbtn" id="fs-up" aria-label="글자 크게"><span aria-hidden="true" style="font-size:2.1rem;font-weight:700">가</span></button>
+      </div>
+    </div>
+  </div>
+</header>
+<div class="shell">
+  <div class="side" id="side-nav">
+    <button type="button" class="side-tg" id="side-tg" aria-expanded="true" aria-controls="side-nav" title="메뉴 접기"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg><span class="tg-l">메뉴 접기</span></button>
+    <div class="inst"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M6 21V5a2 2 0 012-2h8a2 2 0 012 2v16M6 10H4a2 2 0 00-2 2v7a2 2 0 002 2h16a2 2 0 002-2v-7a2 2 0 00-2-2h-2M10 8h4M10 12h4M14 21v-3a2 2 0 00-4 0v3"/></svg><div><b>한국주택금융공사</b></div></div>
+    <nav aria-labelledby="menu-h"><h2 id="menu-h">신청 업무</h2><ul id="menu"></ul></nav>
+    <button type="button" class="btn btn-tertiary btn-sm side-guide" data-help>이용 안내</button>
+  </div>
+  <main id="main" tabindex="-1"></main>
+</div>
+<footer class="ft"><div class="ft-in">
+  <b class="ft-brand">보안길잡이 AI</b>
+  <p class="ft-copy">Copyright © 2026 Team HF. All rights reserved.</p>
+</div></footer>
+<dialog id="dlg" aria-labelledby="dlg-title"></dialog>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<input type="file" id="file" accept=".pdf,.hwp,.hwpx,.docx" hidden>
+<!-- shell:end -->
+<!-- 화면 내용은 assets/js/screens/submitted.js 가 #main 안에 그립니다 -->
+<script src="assets/js/core.js"></script>
+<script src="assets/js/components.js"></script>
+<script src="assets/js/screens/submitted.js"></script>
+<script src="assets/js/boot.js"></script>
+</body>
+</html>
