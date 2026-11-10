@@ -23,6 +23,15 @@ for(const [username,displayName,department,role] of accounts) {
   if(role!=='APPLICANT') await admin('POST',`/api/members/${username}/role-assignments`,{role,active:true,reason:'심사용 시연 계정 등록'});
   if(role==='INFRA'||role==='SECURITY') await admin('POST','/api/reviewer-pools',{field:role,memberUsername:username,defaultReviewer:true});
 }
+// 추론 모델은 본문뿐 아니라 추론 토큰도 한도에 포함하므로 문서 용도에 별도 여유를 둔다.
+const models=await admin('GET','/api/llm-configurations');
+const deepseek=models.find(model=>model.name==='openrouter-deepseek-v4.1-flash-1017');
+if(deepseek&&!models.some(model=>model.name==='openrouter-deepseek-document')) {
+ await admin('POST','/api/llm-configurations',{
+   ...deepseek,name:'openrouter-deepseek-document',purposes:['DOCUMENT'],maxTokens:8192,priority:4,active:true,
+   reason:'협의 요약·최종 초안의 추론 토큰과 JSON 본문 출력 여유 확보'
+ });
+}
 const ownerA=await client('an.dw'), ownerB=await client('park.sy');
 const infra=await client('kim.dh'), security=await client('jung.ys');
 const publication=await ownerA('GET','/api/publications/current');

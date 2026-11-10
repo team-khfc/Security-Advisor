@@ -14,6 +14,12 @@ for(const [username,role] of Object.entries(roles)) {
  console.log(`PASS 로그인·역할: ${username} ${role}`);
 }
 const admin=sessions['moon.sw'];
+const models=await admin('GET','/api/llm-configurations');
+const documentModel=models.find(model=>model.name==='openrouter-deepseek-document');
+assert.ok(documentModel?.active);
+assert.deepEqual(documentModel.purposes,['DOCUMENT']);
+assert.equal(documentModel.maxTokens,8192);assert.equal(documentModel.priority,4);
+console.log('PASS 문서 전용 모델 출력 한도·우선순위');
 const members=await admin('GET','/api/members');
 assert.equal(members.filter(m=>m.active).length,5);
 const expectedStatus={DRAFT:'DRAFTING',MULTI:'DRAFTING',REVIEW:'IN_REVIEW',SECURITY_WAIT:'IN_REVIEW',SUPPLEMENT:'SUPPLEMENT_REQUESTED',FINAL_REVIEW:'FINAL_REVIEW',SUBMITTED:'SUBMITTED',CONFIRMED:'CONFIRMED',APPLIED:'CONFIRMED',NOT_APPLICABLE:'CONFIRMED',REVOKED:'CONFIRMED',RETURNED:'IN_REVIEW',WITHDRAWN:'WITHDRAWN'};
