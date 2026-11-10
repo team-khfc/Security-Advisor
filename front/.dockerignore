@@ -1,0 +1,12 @@
+node_modules
+.next
+.git
+.github
+.env*
+!.env.example
+coverage
+*.log
+*.tsbuildinfo
+.openai
+.test-backend
+secret/

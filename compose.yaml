@@ -1,0 +1,83 @@
+name: security-advisor-demo
+services:
+  db:
+    image: pgvector/pgvector:pg17
+    environment:
+      POSTGRES_DB: securityadvisor_demo
+      POSTGRES_USER: demo
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Copy .env.example to .env first}
+    volumes:
+      - database:/var/lib/postgresql/data
+    healthcheck:
+      test: [CMD-SHELL, pg_isready -U demo -d securityadvisor_demo]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+    restart: unless-stopped
+  app:
+    build: ./back
+    env_file: .env
+    environment:
+      DB_URL: jdbc:postgresql://db:5432/securityadvisor_demo
+      DB_USERNAME: demo
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      STORAGE_DIR: /data/storage
+      SPRING_PROFILES_ACTIVE: demo
+      SESSION_COOKIE_SECURE: 'false'
+      SMTP_HOST: ''
+      NOTIFY_WEBHOOK_URL: ''
+    volumes:
+      - documents:/data/storage
+    ports:
+      - '127.0.0.1:${BACK_PORT:-8080}:8080'
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+  demo:
+    image: node:24-alpine
+    working_dir: /demo
+    command: [node, scripts/seed.mjs]
+    environment:
+      DEMO_ORIGIN: http://app:8080
+      DEMO_ACCOUNT_PASSWORD: ${DEMO_ACCOUNT_PASSWORD:?Demo password required}
+      LLM_MODE: ${LLM_MODE:-fake}
+    volumes:
+      - ./scripts:/demo/scripts:ro
+      - ./samples:/demo/samples:ro
+      - demo-state:/state
+    depends_on:
+      app:
+        condition: service_started
+    restart: 'no'
+  front:
+    build: ./front
+    environment:
+      API_MODE: api
+      API_BASE_URL: http://app:8080
+    ports:
+      - '127.0.0.1:${FRONT_PORT:-3000}:3000'
+    depends_on:
+      demo:
+        condition: service_completed_successfully
+    restart: unless-stopped
+  smoke:
+    image: node:24-alpine
+    profiles: [test]
+    working_dir: /demo
+    command: [node, scripts/smoke.mjs]
+    environment:
+      DEMO_ORIGIN: http://front:3000
+      DEMO_ACCOUNT_PASSWORD: ${DEMO_ACCOUNT_PASSWORD}
+      LLM_MODE: ${LLM_MODE:-fake}
+    volumes:
+      - ./scripts:/demo/scripts:ro
+      - ./samples:/demo/samples:ro
+      - demo-state:/state:ro
+    depends_on:
+      front:
+        condition: service_healthy
+volumes:
+  database:
+  documents:
+  demo-state:

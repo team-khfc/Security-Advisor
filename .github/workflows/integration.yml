@@ -1,0 +1,36 @@
+name: Judge installation
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  compose-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - name: Document versions
+        run: python3 tools/check_doc_versions.py
+      - name: Snapshot integrity
+        run: python3 scripts/verify-snapshots.py
+      - name: Prepare local demo configuration
+        run: cp .env.example .env
+      - name: Validate compose
+        run: docker compose config --quiet
+      - name: Build and start from an empty database
+        run: docker compose up -d --build
+      - name: Integration smoke through frontend
+        run: docker compose --profile test run --rm smoke
+      - name: Restart preserves data
+        run: |
+          docker compose stop
+          docker compose up -d
+          docker compose --profile test run --rm smoke
+      - name: Diagnostic logs
+        if: failure()
+        run: docker compose logs --tail 80 app demo front
+      - name: Clean isolated CI environment
+        if: always()
+        run: docker compose down -v

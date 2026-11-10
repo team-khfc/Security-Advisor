@@ -1,0 +1,41 @@
+# Back의 compose.yaml 뒤에 병합하는 로컬 연동 시험 전용 구성이다.
+# !override를 지원하는 Docker Compose 2.24.4 이상이 필요하다.
+services:
+  db:
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:?테스트 DB 이름이 필요합니다}
+      POSTGRES_USER: ${POSTGRES_USER:?테스트 DB 사용자가 필요합니다}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?테스트 DB 비밀번호가 필요합니다}
+
+  app:
+    # 기존 Back/.env의 실제 모델 키나 외부 알림 설정을 가져오지 않는다.
+    env_file: !override
+      - path: ${SECURITYADVISOR_TEST_ENV_FILE:?테스트 환경 파일 경로가 필요합니다}
+        required: true
+    environment:
+      SERVER_PORT: '8080'
+      SESSION_COOKIE_SECURE: 'false'
+      LLM_MODE: ${LLM_MODE:-fake}
+      DEMO_ACCOUNT_PASSWORD: ${DEMO_ACCOUNT_PASSWORD:?합성 계정 비밀번호가 필요합니다}
+      DB_USERNAME: ${POSTGRES_USER:?테스트 DB 사용자가 필요합니다}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:?테스트 DB 비밀번호가 필요합니다}
+      SMTP_HOST: ''
+      NOTIFY_WEBHOOK_URL: ''
+    ports: !override
+      - '127.0.0.1:${SECURITYADVISOR_BACKEND_PORT:-8081}:8080'
+
+  front:
+    build:
+      context: ${SECURITYADVISOR_FRONTEND_DIR:?Front 저장소 경로가 필요합니다}
+      dockerfile: Dockerfile
+    environment:
+      API_MODE: api
+      API_BASE_URL: http://app:8080
+      PORT: '3000'
+      HOSTNAME: 0.0.0.0
+    depends_on:
+      app:
+        condition: service_started
+    ports:
+      - '0.0.0.0:${SECURITYADVISOR_FRONTEND_PORT:-3001}:3000'
+    restart: unless-stopped
