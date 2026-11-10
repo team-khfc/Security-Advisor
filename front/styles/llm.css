@@ -1,0 +1,40 @@
+.llm-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-block: 1rem;
+}
+dialog:has(.llm-form) {
+  overflow: hidden;
+}
+.llm-values > div {
+  display: grid;
+  grid-template-columns: minmax(9rem, 1fr) minmax(0, 3fr);
+  gap: 1rem;
+  padding-block: 0.6rem;
+}
+.llm-values dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.llm-form .tbl th,
+.llm-form .tbl td {
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
+.llm-form .tbl {
+  table-layout: fixed;
+  width: 100%;
+}
+.llm-form .card {
+  margin-block: 1.6rem;
+}
+@media (max-width: 760px) {
+  .llm-values > div {
+    grid-template-columns: 1fr;
+    gap: 0.3rem;
+  }
+  .llm-values dt {
+    font-weight: 700;
+  }
+}

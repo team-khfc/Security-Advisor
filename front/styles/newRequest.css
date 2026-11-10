@@ -1,0 +1,1240 @@
+/* 보안길잡이 AI | 새 신청 화면 전용 */
+.filebar {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem 1.6rem;
+  flex-wrap: wrap;
+  border: 1px solid var(--sf-border);
+  border-radius: var(--r-card);
+  background: var(--sf-surface);
+  padding: 1.6rem 2.4rem;
+  margin-bottom: 2.4rem;
+}
+.fname {
+  font-weight: 700;
+  max-width: 42ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+.fname.full {
+  white-space: normal;
+  max-width: none;
+}
+.filebar .grow {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  flex-wrap: wrap;
+}
+.work {
+  display: grid;
+  grid-template-columns: minmax(40rem, 1fr) 1.6rem minmax(0, var(--info-w, 380px));
+  gap: 0.8rem;
+  align-items: stretch;
+}
+.splitter {
+  cursor: col-resize;
+  display: grid;
+  place-items: center;
+  border-radius: var(--r-sm);
+  touch-action: none;
+}
+.splitter span {
+  width: 0.4rem;
+  height: 6.4rem;
+  border-radius: 2px;
+  background: var(--sf-border-strong);
+}
+.splitter:hover span,
+.splitter.drag span,
+.splitter:focus-visible span {
+  background: var(--sf-primary);
+  height: 9.6rem;
+}
+.split-help {
+  margin: 1.2rem 0 0;
+}
+body.resizing {
+  cursor: col-resize;
+  user-select: none;
+}
+.chatp,
+.infop {
+  height: var(--work-h);
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--sf-border);
+  border-radius: var(--r-panel);
+  background: var(--sf-surface);
+  min-width: 0;
+}
+.chatp-h {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.8rem 1.6rem;
+  flex-wrap: wrap;
+  padding: 2rem 2.4rem 1.6rem;
+}
+.chatp-h .ttl {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+}
+.av {
+  width: 3.2rem;
+  height: 3.2rem;
+  border-radius: 50%;
+  background: var(--sf-primary-soft);
+  color: var(--sf-primary-text);
+  font-size: 1.3rem;
+  font-weight: 700;
+  display: grid;
+  place-items: center;
+  flex: none;
+}
+.msgs {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 0.4rem 2.4rem 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.6rem;
+  overscroll-behavior: contain;
+}
+.m-ai {
+  display: flex;
+  gap: 1.2rem;
+  align-items: flex-start;
+  max-width: 88%;
+}
+.m-ai .body {
+  min-width: 0;
+}
+.bubble {
+  background: var(--sf-background);
+  border: 1px solid var(--sf-line);
+  border-radius: var(--r-card);
+  padding: 1.2rem 1.6rem;
+}
+.m-me {
+  align-self: flex-end;
+  max-width: 76%;
+  background: var(--sf-primary-soft);
+  border-radius: var(--r-card);
+  padding: 1.2rem 1.6rem;
+}
+.m-src {
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+  font-size: 1.3rem;
+  color: var(--sf-muted);
+  margin-top: 0.6rem;
+}
+.m-ok {
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+  font-size: 1.5rem;
+  color: var(--sf-success-text);
+  margin-top: 0.6rem;
+}
+.tr-box {
+  margin-top: 1rem;
+  border-left: 3px solid var(--sf-primary);
+  background: var(--sf-surface);
+  padding: 0.8rem 1.2rem;
+  font-size: 1.5rem;
+  border-radius: 0 var(--r-sm) var(--r-sm) 0;
+}
+.tr-box b {
+  display: block;
+  font-size: 1.3rem;
+  color: var(--sf-primary-text);
+}
+.wr-box {
+  margin-top: 1rem;
+  border-left: 3px solid var(--sf-warning-text);
+  background: var(--sf-warning-soft);
+  padding: 0.8rem 1.2rem;
+  font-size: 1.5rem;
+  border-radius: 0 var(--r-sm) var(--r-sm) 0;
+}
+.typing {
+  display: flex;
+  gap: 0.5rem;
+  padding: 1.6rem;
+}
+.typing i {
+  width: 0.7rem;
+  height: 0.7rem;
+  border-radius: 50%;
+  background: var(--sf-muted);
+  animation: blink 1s infinite;
+}
+.typing i:nth-child(2) {
+  animation-delay: 0.15s;
+}
+.typing i:nth-child(3) {
+  animation-delay: 0.3s;
+}
+@keyframes blink {
+  0%,
+  80%,
+  100% {
+    opacity: 0.25;
+  }
+  40% {
+    opacity: 1;
+  }
+}
+.qcard {
+  flex: none;
+  margin: 0 2.4rem 2.4rem;
+  border: 1px solid var(--sf-primary);
+  border-radius: var(--r-card);
+  padding: 2rem 2.4rem;
+  max-height: 55%;
+  overflow-y: auto;
+  background: var(--sf-surface);
+}
+.qnum {
+  color: var(--sf-primary-text);
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0;
+}
+.qtitle {
+  font-size: 1.9rem;
+  margin: 0.2rem 0 0.4rem;
+  font-weight: 700;
+}
+.qhelp {
+  font-size: 1.5rem;
+  color: var(--sf-muted);
+  margin: 0 0 1.6rem;
+}
+.qrow {
+  display: flex;
+  gap: 0.8rem;
+  align-items: stretch;
+}
+.qrow .input {
+  flex: 1;
+}
+.qcard fieldset {
+  margin-bottom: 1.6rem;
+}
+.qcard .field {
+  margin-bottom: 0;
+}
+.infop-h {
+  padding: 2rem 2.4rem 1.6rem;
+  border-bottom: 1px solid var(--sf-line);
+}
+.infop-h .row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1.2rem;
+}
+.prog {
+  height: 0.6rem;
+  background: var(--sf-background);
+  border-radius: 3px;
+  margin-top: 1.2rem;
+  position: relative;
+}
+.prog i {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: var(--sf-primary);
+  border-radius: 3px;
+}
+.infop-b {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 0 2.4rem 1.6rem;
+}
+.grp {
+  font-size: 1.5rem;
+  font-weight: 700;
+  background: var(--sf-background);
+  padding: 0.8rem 1.2rem;
+  border-radius: var(--r-sm);
+  margin: 1.6rem 0 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.8rem;
+}
+.irow {
+  display: grid;
+  grid-template-columns: 9.6rem minmax(0, 1fr) auto;
+  gap: 0.8rem;
+  align-items: center;
+  padding: 1rem 0.4rem;
+  border-bottom: 1px solid var(--sf-line);
+  font-size: 1.5rem;
+}
+.irow .v.empty {
+  color: var(--sf-muted);
+}
+.irow .src {
+  font-size: 1.3rem;
+  color: var(--sf-muted);
+  white-space: nowrap;
+}
+.rrow {
+  padding: 1rem 0.4rem;
+  border-bottom: 1px solid var(--sf-line);
+  font-size: 1.5rem;
+}
+.rrow .biz {
+  font-size: 1.3rem;
+  color: var(--sf-muted);
+}
+.rrow .flow {
+  font-weight: 700;
+}
+.need {
+  color: var(--sf-warning-text);
+  font-weight: 700;
+}
+.infop-f {
+  padding: 1.6rem 2.4rem 2rem;
+  border-top: 1px solid var(--sf-line);
+}
+.infop-f .help {
+  margin: 1rem 0 0;
+}
+.namerow {
+  background: var(--sf-background);
+  border-radius: var(--r-ctl);
+  margin-top: 1.2rem;
+  padding: 1rem 0.8rem;
+}
+.namerow b {
+  font-size: 1.6rem;
+}
+.intake {
+  display: flex;
+  flex-direction: column;
+}
+.dropzone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.2rem;
+  text-align: center;
+  border: 2px dashed var(--sf-border-strong);
+  border-radius: var(--r-panel);
+  background: var(--sf-surface);
+  padding: 5.6rem 2.4rem;
+  transition:
+    background 0.15s,
+    border-color 0.15s;
+}
+.dropzone.drag,
+.docbar.drag {
+  border-color: var(--sf-primary);
+  background: var(--sf-primary-soft);
+}
+.dz-ic {
+  width: 7.2rem;
+  height: 7.2rem;
+  border-radius: 50%;
+  background: var(--sf-primary-soft);
+  color: var(--sf-primary-text);
+  display: grid;
+  place-items: center;
+}
+.pend {
+  list-style: none;
+  margin: 1.6rem 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+.pend li {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  border: 1px solid var(--sf-border);
+  border-radius: var(--r-ctl);
+  background: var(--sf-surface);
+  padding: 0.6rem 1rem;
+}
+.pend .pn {
+  font-weight: 700;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.intake-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.8rem;
+  flex-wrap: wrap;
+  margin-top: 2rem;
+}
+.docbar {
+  border: 1px solid var(--sf-border);
+  border-radius: var(--r-card);
+  background: var(--sf-surface);
+  padding: 1.2rem 1.6rem;
+  margin-bottom: 2.4rem;
+}
+.docbar-in {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem 1.6rem;
+  flex-wrap: wrap;
+}
+.dchips {
+  display: flex;
+  gap: 0.8rem;
+  flex-wrap: wrap;
+  align-items: center;
+  min-width: 0;
+}
+.dchip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  border: 1px solid var(--sf-border);
+  border-radius: 999px;
+  padding: 0.3rem 0.6rem 0.3rem 1rem;
+  max-width: 36rem;
+  font-size: 1.5rem;
+}
+.dchip .dn {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+.dchip svg {
+  width: 16px;
+  height: 16px;
+}
+.asteps {
+  list-style: none;
+  margin: 0.8rem 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+.asteps li {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  color: var(--sf-muted);
+}
+.ai-dot {
+  width: 1.6rem;
+  height: 1.6rem;
+  border-radius: 50%;
+  border: 2px solid var(--sf-border-strong);
+  flex: none;
+}
+.asteps li.now {
+  color: var(--sf-text);
+  font-weight: 700;
+}
+.asteps li.now .ai-dot {
+  border-color: var(--sf-primary);
+  border-top-color: transparent;
+  animation: spin 0.8s linear infinite;
+}
+.asteps li.done {
+  color: var(--sf-text);
+}
+.asteps li.done .ai-dot {
+  background: var(--sf-success-text);
+  border-color: var(--sf-success-text);
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.drow {
+  padding: 1rem 0.4rem;
+  border-bottom: 1px solid var(--sf-line);
+  font-size: 1.5rem;
+}
+.drow-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.8rem;
+}
+.drow-top .k {
+  font-weight: 700;
+}
+.drow-v {
+  margin-top: 0.2rem;
+}
+.evi {
+  display: flex;
+  gap: 0.6rem;
+  align-items: flex-start;
+  font-size: 1.3rem;
+  color: var(--sf-muted);
+  margin: 0.4rem 0 0;
+}
+.evi svg {
+  margin-top: 0.2rem;
+}
+.drow-act {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 0.6rem;
+}
+.grp .btn-sm {
+  min-height: 3.2rem;
+  font-size: 1.3rem;
+  padding: 0 1rem;
+}
+.hints {
+  list-style: none;
+  margin: 0.4rem 0 0;
+  padding: 0;
+}
+.hints li {
+  display: flex;
+  gap: 0.8rem;
+  align-items: baseline;
+  flex-wrap: wrap;
+  padding: 0.6rem 0.4rem;
+  border-bottom: 1px solid var(--sf-line);
+  font-size: 1.5rem;
+}
+.qchip.strong {
+  background: var(--sf-primary);
+  color: var(--sf-on-primary);
+  font-weight: 700;
+}
+.rv-rules {
+  margin: 0 0 1.2rem;
+  padding-left: 2.4rem;
+  font-size: 1.5rem;
+}
+.rv-rules li {
+  margin-bottom: 0.6rem;
+}
+.qchips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  margin-bottom: 1.6rem;
+}
+.qchip {
+  min-height: 4.4rem;
+  padding: 0 1.8rem;
+  border: 1px solid var(--sf-primary);
+  border-radius: 999px;
+  background: var(--sf-surface);
+  color: var(--sf-primary-text);
+  font-size: 1.6rem;
+  cursor: pointer;
+}
+.qchip:hover {
+  background: var(--sf-primary-soft);
+}
+.qchip:active {
+  background: var(--sf-primary);
+  color: var(--sf-on-primary);
+}
+.irow {
+  grid-template-columns: 9.6rem minmax(0, 1fr) auto auto;
+}
+.iedit-btn {
+  width: 3.6rem;
+  height: 3.6rem;
+  display: grid;
+  place-items: center;
+  border: 1px solid transparent;
+  border-radius: var(--r-ctl);
+  background: none;
+  color: var(--sf-muted);
+  cursor: pointer;
+}
+.iedit-btn svg {
+  width: 16px;
+  height: 16px;
+}
+.iedit-btn:hover {
+  border-color: var(--sf-border-strong);
+  color: var(--sf-primary-text);
+}
+.irow.editing {
+  grid-template-columns: 9.6rem minmax(0, 1fr);
+  background: var(--sf-primary-soft);
+  border-radius: var(--r-ctl);
+  padding: 1rem 0.8rem;
+}
+.irow .ie {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+.irow .ie select.input {
+  width: 100%;
+  padding-right: 2.8rem;
+}
+@media (max-width: 1023px) {
+  .work {
+    grid-template-columns: 1fr;
+    gap: 2.4rem;
+  }
+  .splitter,
+  .split-help {
+    display: none;
+  }
+  .chatp {
+    height: max(56rem, 72dvh);
+  }
+  .infop {
+    height: max(52rem, 64dvh);
+  }
+}
+@media (max-width: 767px) {
+  .msgs {
+    padding: 0.4rem 1.6rem 1.6rem;
+  }
+  .qcard {
+    margin: 0 1.2rem 1.2rem;
+    padding: 1.6rem;
+  }
+  .chatp-h,
+  .infop-h {
+    padding: 1.6rem;
+  }
+  .infop-b {
+    padding: 0 1.6rem 1.2rem;
+  }
+  .infop-f {
+    padding: 1.6rem;
+  }
+  .m-ai,
+  .m-me {
+    max-width: 100%;
+  }
+  .qrow {
+    flex-direction: column;
+  }
+}
+/* 새 신청 시작 화면: 파일 놓는 영역이 작업 영역 전체를 차지하고, 보조 행동은 오른쪽 아래 */
+.intake .dropzone {
+  justify-content: center;
+  min-height: calc(var(--work-h) - 6.8rem);
+}
+.intake .pend {
+  width: min(100%, 64rem);
+  text-align: left;
+}
+
+/* 디자인 기준 본문 17px·도움말 15px을 화면 축소 없이 표시한다. */
+main:has(.new-request-page) {
+  padding: 2.592rem 3.24rem 5.184rem;
+}
+.new-request-page {
+  min-width: 0;
+  font-size: 1.7rem;
+}
+.new-request-page .page-head {
+  margin-bottom: 2.4rem;
+}
+.new-request-page .new-case-intake {
+  margin: 0;
+  width: 100%;
+}
+.new-request-page .new-case-intake .dropzone {
+  justify-content: center;
+  min-height: calc(var(--work-h) - 6.8rem);
+  padding: 5.6rem 2.4rem;
+  border-width: 2px;
+}
+.new-request-page .dropzone > .help,
+.new-request-page .dropzone > .ferr {
+  margin: 0;
+  max-width: 66ch;
+}
+.new-request-page .dz-ic svg {
+  width: 4rem;
+  height: 4rem;
+  stroke-width: 1.6;
+}
+.new-request-page .new-case-actions {
+  justify-content: flex-end;
+  align-items: center;
+  gap: 0.8rem;
+  margin-top: 2rem;
+}
+.new-request-page .btn {
+  border-width: 1px;
+  max-width: 100%;
+}
+.new-request-page .new-case-actions .btn {
+  white-space: normal;
+  text-align: center;
+}
+.new-case-start-form .new-case-basics {
+  border: 0;
+  padding: 0;
+  margin: 0 0 2.4rem;
+}
+.new-case-start-form .new-case-basics > .h-panel {
+  margin-bottom: 1.6rem;
+}
+.new-case-basics .form-two {
+  align-items: start;
+  margin-bottom: 2rem;
+}
+.new-case-basics .form-two > .field {
+  min-width: 0;
+  margin: 0;
+  align-content: start;
+}
+.new-case-basics .form-two .input {
+  width: 100%;
+  min-height: 4.8rem;
+}
+.new-case-start-form .document-option {
+  min-width: 0;
+  flex: 1 1 22rem;
+}
+.new-case-start-form .document-choice {
+  margin-bottom: 1.6rem;
+}
+.new-case-start-form .sub-block {
+  margin-top: 1.6rem;
+}
+.new-case-start-form .sub-block[open] > summary {
+  margin-bottom: 1.2rem;
+}
+.new-case-start-form .field:last-child {
+  margin-bottom: 0;
+}
+@media (max-width: 1023px) {
+  main:has(.new-request-page) {
+    padding: 1.944rem 1.944rem 3.888rem;
+  }
+}
+@media (max-width: 767px) {
+  main:has(.new-request-page) {
+    padding: 1.296rem 1.296rem 3.24rem;
+  }
+  .new-request-page .pend li {
+    flex-wrap: wrap;
+  }
+  .new-request-page .pend .pn {
+    flex: 1 1 calc(100% - 3rem);
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+}
+@media print {
+  main:has(.new-request-page) {
+    padding: 0;
+  }
+}
+
+/* UI 통합 Stage 4-A (prototype-soo 563dd7e 대화·수집 정보 작업 영역 기준)
+ * 사업 건 화면(/cases/[id])이 시안의 .work·.chatp·.infop 구조를 쓰도록 맞춘 보정. 업무 로직과 무관하다. */
+.chatp-h .ttl .h-panel {
+  margin: 0;
+}
+.av svg {
+  width: 1.8rem;
+  height: 1.8rem;
+}
+.bubble p {
+  margin: 0;
+}
+.bubble p + p {
+  margin-top: 0.8rem;
+}
+p.m-me {
+  margin: 0;
+  white-space: pre-wrap;
+}
+.msgs > .sub-block,
+.msgs > .notice {
+  margin: 0;
+}
+.qnum {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.8rem;
+}
+label.qtitle,
+h3.qtitle {
+  display: block;
+}
+.qcard textarea {
+  min-height: 9rem;
+  max-height: 20rem;
+}
+.qcard .btn-row {
+  margin-top: 1.6rem;
+}
+progress.prog {
+  appearance: none;
+  display: block;
+  width: 100%;
+  height: 0.6rem;
+  border: 0;
+  overflow: hidden;
+  background: var(--sf-background);
+}
+progress.prog::-webkit-progress-bar {
+  background: var(--sf-background);
+  border-radius: 3px;
+}
+progress.prog::-webkit-progress-value {
+  background: var(--sf-primary);
+  border-radius: 3px;
+}
+progress.prog::-moz-progress-bar {
+  background: var(--sf-primary);
+  border-radius: 3px;
+}
+.infop-b > .help {
+  margin: 0.8rem 0 0;
+}
+/* 긴 항목명도 읽을 수 있도록 라벨 폭을 확보하고 값과 출처는 남은 폭에서 줄바꿈한다. */
+.infop-b .answer-item {
+  display: grid;
+  grid-template-columns: 14rem minmax(0, 1fr);
+  gap: 0.4rem 0.8rem;
+  align-items: baseline;
+  padding: 1rem 0.4rem;
+  border-bottom: 1px solid var(--sf-line);
+  font-size: 1.7rem;
+}
+.infop-b .answer-item dt {
+  font-weight: 400;
+  color: var(--sf-muted);
+  margin: 0;
+}
+.infop-b .answer-item dd {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.4rem 0.8rem;
+}
+.infop-b .answer-item dd > p {
+  margin: 0;
+}
+.infop-b .answer-item .evidence {
+  flex-basis: 100%;
+  margin-top: 0;
+}
+@media (max-width: 767px) {
+  .infop-b .answer-item {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+/* 문서 분석은 시안처럼 작업 영역 위 문서 막대(.docbar)에 둔다 */
+.case-analysis > summary {
+  cursor: pointer;
+  color: var(--sf-primary-text);
+  font-weight: 700;
+  min-height: 4.4rem;
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  list-style: none;
+}
+.case-analysis > summary::-webkit-details-marker {
+  display: none;
+}
+.case-analysis > summary::before {
+  content: '';
+  flex: none;
+  width: 0.8rem;
+  height: 0.8rem;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(-45deg);
+}
+.case-analysis[open] > summary::before {
+  transform: rotate(45deg);
+}
+.case-analysis[open] > summary {
+  margin-bottom: 1.2rem;
+}
+
+/* 시안처럼 대화와 질문을 한 작업 영역에 두고 대화만 내부 스크롤한다. */
+.case-work .chatp,
+.case-work .infop {
+  height: var(--work-h);
+  overflow: hidden;
+}
+.case-work .chatp-h,
+.case-work .infop-h,
+.case-work .infop-f {
+  flex-shrink: 0;
+}
+.case-work .conversation-body {
+  flex: 1 1 auto;
+  min-height: 12rem;
+}
+
+/* 첨부 목록은 채팅 입력 위에 두고 긴 목록·분석 결과만 내부 스크롤한다. */
+.case-work .chat-attachments {
+  flex: 0 0 auto;
+  min-height: 0;
+  max-height: 28%;
+  overflow: auto;
+  padding: 1.2rem 1.6rem;
+  border-top: 1px solid var(--sf-border);
+}
+.case-work .chat-attachments .field {
+  margin: 0;
+}
+.case-work .chat-attachments .pend {
+  width: 100%;
+  max-width: none;
+  margin: 0.8rem 0;
+}
+.case-work .chat-attachments .pend li {
+  flex-wrap: wrap;
+}
+.case-work .chat-attachments .pend .btn {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
+.case-work .conversation-log,
+.case-work .chat-pair {
+  display: flex;
+  flex-direction: column;
+  gap: 1.6rem;
+}
+.case-work .interview-question {
+  max-height: 38%;
+  margin: 0 1.6rem 1.6rem;
+  padding: 1.2rem 1.6rem;
+}
+.case-work form.interview-question {
+  min-height: 0;
+  display: grid;
+  gap: 0.8rem;
+}
+.case-work .interview-question .qrow .input {
+  min-width: 0;
+  width: 100%;
+}
+.case-work .interview-question .qrow .btn {
+  flex-shrink: 0;
+  align-self: flex-end;
+}
+.case-work .interview-question .qchips {
+  margin-top: 0;
+}
+.case-work .interview-question .qchip {
+  padding-block: 0.8rem;
+  white-space: normal;
+  text-align: left;
+}
+.case-work .interview-question .qchip:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+.case-work .interview-question .field > label {
+  font-weight: 400;
+}
+.case-work .interview-question .field > .help {
+  margin: 0;
+}
+.case-work .interview-draft-note {
+  margin: 0.8rem 0 0;
+}
+.case-work .interview-question > .btn-row {
+  justify-content: flex-end;
+  margin-top: 0.8rem;
+}
+.case-work .infop-b {
+  height: 0;
+}
+.interview-complete-actions {
+  align-items: stretch;
+}
+.interview-complete-actions > .btn {
+  min-width: 0;
+  max-width: 100%;
+  padding: 0.8rem 1.6rem;
+  white-space: normal;
+  text-align: center;
+}
+@media (max-width: 1023px) {
+  .case-work .infop {
+    height: max(50rem, 60dvh);
+  }
+}
+@media (max-width: 767px) {
+  .case-work .chatp {
+    height: max(64rem, 80dvh);
+  }
+  .case-work .qnum {
+    flex-wrap: wrap;
+  }
+  .case-work .interview-question .qrow .btn {
+    white-space: normal;
+  }
+}
+/* 항목별 도움말·AI 대화와 공식 답변을 시각적으로 구분한다. */
+.interview-assistance {
+  display: grid;
+  gap: 0.8rem;
+  margin: 1.2rem 0;
+}
+.interview-input-modes {
+  display: flex;
+  border-bottom: 1px solid var(--sf-primary);
+  gap: 0;
+}
+.interview-input-modes > [role='tab'] {
+  flex: 1;
+  min-width: 0;
+  padding: 1rem 0.6rem;
+  border: 0;
+  border-bottom: 3px solid transparent;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+.interview-input-modes [aria-selected='true'] {
+  color: var(--sf-primary-text);
+  border-color: var(--sf-primary);
+  background: var(--sf-primary-soft);
+}
+.interview-input-panel {
+  padding-top: 1.2rem;
+}
+.interview-current .qhelp {
+  margin-bottom: 0;
+}
+.interview-current .btn-row {
+  flex-wrap: wrap;
+}
+.interview-current .btn {
+  white-space: normal;
+}
+.interview-ai-text {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  line-height: 1.7;
+}
+.interview-proposal {
+  display: grid;
+  gap: 1.2rem;
+}
+.interview-proposal .btn,
+.interview-proposal .badge {
+  justify-self: start;
+}
+.interview-evidence {
+  margin: 0;
+}
+.interview-evidence summary {
+  cursor: pointer;
+  color: var(--sf-primary-text);
+}
+.interview-evidence ul {
+  padding-left: 2.2rem;
+}
+.interview-help {
+  padding: 12px 0;
+  line-height: 1.7;
+}
+.interview-help blockquote {
+  margin: 1.2rem 0;
+  padding: 1.2rem 1.6rem;
+  border-left: 3px solid var(--sf-line);
+}
+.interview-help cite {
+  font-size: 0.9em;
+}
+
+/* 수집 정보는 항목별로 펼쳐 수정하고 좁은 패널 안에서 줄바꿈한다. */
+.collected-field {
+  padding-block: 1rem;
+  border-bottom: 1px solid var(--sf-border);
+}
+.collected-field form {
+  display: grid;
+  gap: 0.8rem;
+}
+.collected-field .input {
+  width: 100%;
+  min-width: 0;
+}
+.collected-field .btn-row {
+  flex-wrap: wrap;
+}
+.collected-field .help {
+  overflow-wrap: anywhere;
+}
+
+.date-range-answer {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  padding: 0;
+  margin: 0;
+}
+.date-range-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.2rem;
+  margin-bottom: 0.8rem;
+}
+.date-range-fields label {
+  display: grid;
+  gap: 0.4rem;
+  min-width: 0;
+}
+@media (max-width: 480px) {
+  .date-range-fields {
+    grid-template-columns: 1fr;
+  }
+}
+
+.interview-proposal .interview-apply-now {
+  justify-self: end;
+  order: 1;
+}
+
+.infra-review-info {
+  display: grid;
+  gap: 1.2rem;
+  margin: 1.6rem 0;
+}
+.infra-review-info > div {
+  display: grid;
+  gap: 0.4rem;
+}
+.infra-review-info dt {
+  font-weight: 600;
+}
+.infra-review-info dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.infra-workspace {
+  min-width: 0;
+}
+.infra-ai {
+  display: grid;
+  gap: 1.2rem;
+  min-width: 0;
+  margin: 1.6rem 0 2.4rem;
+  padding: 1.6rem;
+  border: 1px solid var(--sf-border-strong);
+  border-radius: var(--r-ctl);
+}
+.infra-ai .tbl-wrap {
+  max-width: 100%;
+  overflow-x: auto;
+}
+.infra-ai table {
+  min-width: 640px;
+  width: 100%;
+}
+.infra-ai td {
+  overflow-wrap: anywhere;
+  max-width: 24rem;
+  vertical-align: top;
+}
+.infra-ai .btn {
+  justify-self: start;
+}
+.infra-connection-list {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+  display: grid;
+  gap: 1.6rem;
+}
+.infra-connection {
+  border: 1px solid var(--sf-border-strong);
+  border-radius: var(--r-ctl);
+  padding: 1.6rem;
+  min-width: 0;
+}
+.infra-connection legend {
+  font-weight: 700;
+  padding: 0 0.8rem;
+}
+.infra-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1.2rem;
+}
+.infra-link-selects {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.2rem;
+  margin-bottom: 1.6rem;
+}
+.infra-link-selects label {
+  display: grid;
+  gap: 0.6rem;
+  min-width: 0;
+}
+.infra-link-selects select {
+  width: 100%;
+}
+.infra-grid label {
+  display: grid;
+  grid-template-rows: subgrid;
+  grid-row: span 3;
+  gap: 0.6rem;
+  min-width: 0;
+  align-content: start;
+}
+.infra-grid .infra-field-label {
+  grid-row: 1;
+}
+.infra-grid .input {
+  grid-row: 2;
+  align-self: start;
+  width: 100%;
+  min-width: 0;
+}
+.infra-grid .help {
+  grid-row: 3;
+  margin: 0;
+}
+@media (max-width: 800px) {
+  .infra-link-selects {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .infra-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

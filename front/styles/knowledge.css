@@ -1,0 +1,120 @@
+.knowledge-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.6rem;
+  margin-block: 1.6rem;
+}
+.knowledge-publish-bar,
+.knowledge-search {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 1.2rem;
+  flex-wrap: wrap;
+  margin-block: 1.6rem;
+}
+.knowledge-search .field {
+  flex: 1;
+  min-width: 20rem;
+}
+.knowledge-list {
+  list-style: none;
+  padding: 0;
+  margin: 1.6rem 0;
+}
+.knowledge-list > li {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  padding: 1.6rem 0;
+  border-bottom: 1px solid var(--line);
+}
+.knowledge-list > li > div {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.knowledge-list p {
+  margin-block: 0.5rem;
+}
+.knowledge-text {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.knowledge-form fieldset {
+  min-width: 0;
+  border: 0;
+  padding: 0;
+  margin-block: 1.6rem;
+}
+.knowledge-form legend {
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+.knowledge-form .field {
+  margin-bottom: 1.2rem;
+}
+.knowledge-options {
+  max-height: 24rem;
+  overflow: auto;
+  border: 1px solid var(--line);
+  border-radius: 0.8rem;
+  padding: 1rem;
+}
+.knowledge-options label,
+.knowledge-option {
+  display: block;
+  padding-block: 0.6rem;
+}
+.knowledge-attribute {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 2fr) auto;
+  gap: 1rem;
+  align-items: center;
+}
+.insight-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1.6rem;
+  margin-block: 1.6rem;
+}
+.insight-metric h2 {
+  font-size: 1.8rem;
+}
+.insight-value {
+  font-size: 2.6rem;
+  font-weight: 700;
+  margin-block: 1rem;
+}
+.insight-counts > div {
+  display: flex;
+  gap: 1.2rem;
+  justify-content: space-between;
+  padding-block: 0.8rem;
+}
+.insight-counts dd {
+  margin: 0;
+  font-weight: 700;
+}
+@media (max-width: 760px) {
+  .knowledge-grid,
+  .insight-grid {
+    grid-template-columns: 1fr;
+  }
+  .knowledge-list > li {
+    flex-wrap: wrap;
+  }
+  .knowledge-list > li > div {
+    flex-basis: 100%;
+  }
+  .knowledge-attribute {
+    grid-template-columns: 1fr;
+  }
+  .knowledge-search {
+    align-items: stretch;
+  }
+  .knowledge-search .field {
+    min-width: 0;
+    flex-basis: 100%;
+  }
+}

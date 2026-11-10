@@ -1,0 +1,247 @@
+package kr.securityadvisor.request.service;
+
+import java.util.List;
+import kr.securityadvisor.audit.domain.AuditAction;
+import kr.securityadvisor.audit.domain.AuditTargetType;
+import kr.securityadvisor.audit.service.AuditRecorder;
+import kr.securityadvisor.common.dto.PageResponse;
+import kr.securityadvisor.common.error.DomainRuleViolationException;
+import kr.securityadvisor.common.schema.AnswerScope;
+import kr.securityadvisor.common.schema.DocTypeCode;
+import kr.securityadvisor.common.schema.FieldDefinition;
+import kr.securityadvisor.common.schema.FieldSchema;
+import kr.securityadvisor.common.schema.ReviewField;
+import kr.securityadvisor.common.security.MemberPrincipal;
+import kr.securityadvisor.common.security.MemberRole;
+import kr.securityadvisor.configuration.service.PublicationService;
+import kr.securityadvisor.request.domain.Answer;
+import kr.securityadvisor.request.domain.BusinessCase;
+import kr.securityadvisor.request.domain.SecurityRequest;
+import kr.securityadvisor.request.dto.AddSecurityRequestCommand;
+import kr.securityadvisor.request.dto.AnswerResponse;
+import kr.securityadvisor.request.dto.BusinessCaseListItem;
+import kr.securityadvisor.request.dto.BusinessCaseResponse;
+import kr.securityadvisor.request.dto.CreateBusinessCaseRequest;
+import kr.securityadvisor.request.dto.SecurityRequestSummary;
+import kr.securityadvisor.request.dto.UpdateBusinessCaseRequest;
+import kr.securityadvisor.request.repository.AnswerRepository;
+import kr.securityadvisor.request.repository.BusinessCaseRepository;
+import kr.securityadvisor.request.repository.SecurityRequestRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+/**
+ * 사업 건 유스케이스(F-01). 사업 건 1건 + 선택한 서류 유형별 신청 N건을 한 트랜잭션에서 만들고, 조회·개요 수정을 맡는다.
+ */
+@Service
+@Transactional(readOnly = true)
+@RequiredArgsConstructor
+public class BusinessCaseService {
+
+    private final BusinessCaseRepository businessCaseRepository;
+    private final SecurityRequestRepository securityRequestRepository;
+    private final AnswerRepository answerRepository;
+    private final PublicationService publicationService;
+    private final kr.securityadvisor.knowledge.service.KnowledgePublicationService knowledgePublications;
+    private final RequestAccessPolicy accessPolicy;
+    private final AuditRecorder auditRecorder;
+
+    /**
+     * 사업 건과 서류별 신청을 만든다. 현재 게시본을 고정하고, 사업명·개요·부서는 공통 답변(USER_ANSWER)으로도 저장하며,
+     * 담당자가 답할 항목은 "담당자 확인 필요" 자리로 미리 만든다.
+     *
+     * @throws DomainRuleViolationException 서류 유형이 비었거나 게시본에 없는(비활성) 유형일 때(422)
+     */
+    @Transactional
+    public BusinessCaseResponse create(MemberPrincipal principal, CreateBusinessCaseRequest request) {
+        principal.requireAnyRole(MemberRole.APPLICANT);
+        if (request.docTypes() == null || request.docTypes().isEmpty()) {
+            throw new DomainRuleViolationException("서류 유형을 하나 이상 선택해야 합니다");
+        }
+        Long publicationId = publicationService.currentPublicationId();
+        FieldSchema schema = publicationService.getFieldSchema(publicationId);
+        for (DocTypeCode docType : request.docTypes()) {
+            boolean active = schema.findDocType(docType)
+                    .map(definition -> definition.active())
+                    .orElse(false);
+            if (!active) {
+                throw new DomainRuleViolationException("현재 게시본에서 고를 수 없는 서류 유형입니다: " + docType);
+            }
+        }
+
+        BusinessCase businessCase = businessCaseRepository.save(BusinessCase.create(
+                principal.username(),
+                request.title(),
+                request.summary(),
+                request.department(),
+                publicationId,
+                knowledgePublications.currentId()));
+        Long caseId = businessCase.getId();
+
+        List<SecurityRequest> requests = request.docTypes().stream()
+                .sorted()
+                .map(docType -> securityRequestRepository.save(SecurityRequest.create(caseId, docType)))
+                .toList();
+
+        prefillCaseAnswers(businessCase, schema);
+        for (SecurityRequest securityRequest : requests) {
+            prefillRequestPlaceholders(securityRequest, schema);
+        }
+        auditRecorder.record(
+                principal,
+                AuditTargetType.BUSINESS_CASE,
+                String.valueOf(caseId),
+                businessCase.getRevision(),
+                AuditAction.BUSINESS_CASE_CREATED,
+                null,
+                "사업 건 생성 — 게시본 " + publicationId + ", 서류 " + request.docTypes());
+        for (SecurityRequest securityRequest : requests) {
+            auditRecorder.record(
+                    principal,
+                    AuditTargetType.SECURITY_REQUEST,
+                    String.valueOf(securityRequest.getId()),
+                    securityRequest.getRevision(),
+                    AuditAction.SECURITY_REQUEST_CREATED,
+                    null,
+                    securityRequest.getDocType() + " 신청 생성 — 사업 건 " + caseId + ", 1단계 작성 중");
+        }
+        return toResponse(businessCase, requests);
+    }
+
+    /**
+     * 기존 사업 건에 서류(신청)를 추가한다(F-01 P2). 공통 답변·업로드 문서는 그대로 공유되고, 게시본은 사업 건 생성 시점 것을 따른다(불변식 8).
+     * 같은 사업 건의 다른 신청이 이미 2단계면 자동 배정 시 같은 담당자를 우선한다(배정 규칙).
+     *
+     * @throws DomainRuleViolationException 게시본에 없거나 비활성인 유형, 같은 유형의 진행 중 신청 존재(422)
+     */
+    @Transactional
+    public SecurityRequestSummary addRequest(
+            MemberPrincipal principal, Long businessCaseId, AddSecurityRequestCommand command) {
+        BusinessCase businessCase = accessPolicy.ownedCase(principal, businessCaseId);
+        FieldSchema schema = publicationService.getFieldSchema(businessCase.getPublicationId());
+        boolean active = schema.findDocType(command.docType())
+                .map(definition -> definition.active())
+                .orElse(false);
+        if (!active) {
+            throw new DomainRuleViolationException("이 사업 건의 게시본에서 고를 수 없는 서류 유형입니다: " + command.docType());
+        }
+        boolean duplicate = securityRequestRepository.findByBusinessCaseIdOrderByIdAsc(businessCaseId).stream()
+                .anyMatch(r -> r.getDocType().equals(command.docType()) && !r.isTerminal());
+        if (duplicate) {
+            throw new DomainRuleViolationException("같은 유형의 진행 중인 신청이 이미 있습니다: " + command.docType());
+        }
+        SecurityRequest created =
+                securityRequestRepository.save(SecurityRequest.create(businessCaseId, command.docType()));
+        prefillRequestPlaceholders(created, schema);
+        auditRecorder.record(
+                principal,
+                AuditTargetType.SECURITY_REQUEST,
+                String.valueOf(created.getId()),
+                created.getRevision(),
+                AuditAction.SECURITY_REQUEST_CREATED,
+                null,
+                created.getDocType() + " 신청 추가 — 사업 건 " + businessCaseId + ", 1단계 작성 중"
+                        + (command.renewsFirewallRuleId() == null
+                                ? ""
+                                : " (규칙 " + command.renewsFirewallRuleId() + " 연장)"));
+        return SecurityRequestSummary.from(created);
+    }
+
+    /** 사업 건 상세(공통 답변·하위 신청 요약 포함). */
+    public BusinessCaseResponse get(MemberPrincipal principal, Long businessCaseId) {
+        BusinessCase businessCase = accessPolicy.viewableCase(principal, businessCaseId);
+        return toResponse(businessCase, visibleRequests(principal, businessCaseId));
+    }
+
+    /** 역할별로 조회 가능한 사업 건과 하위 신청만 반환한다. */
+    public PageResponse<BusinessCaseListItem> listMine(MemberPrincipal principal, Pageable pageable) {
+        return PageResponse.from(
+                businessCaseRepository.findVisible(
+                        principal.username(),
+                        principal.role().name(),
+                        principal.role() == MemberRole.INFRA || principal.role() == MemberRole.SECURITY
+                                ? ReviewField.valueOf(principal.role().name())
+                                : null,
+                        pageable),
+                businessCase -> {
+                    List<SecurityRequest> requests = visibleRequests(principal, businessCase.getId());
+                    return BusinessCaseListItem.from(
+                            businessCase,
+                            ProgressSummary.of(requests),
+                            requests.stream().map(SecurityRequestSummary::from).toList());
+                });
+    }
+
+    /** 사업 개요 수정. 제출된 신청의 제출본은 스냅샷이라 영향이 없다(불변식 17). */
+    @Transactional
+    public BusinessCaseResponse updateOutline(
+            MemberPrincipal principal, Long businessCaseId, UpdateBusinessCaseRequest request) {
+        BusinessCase businessCase = accessPolicy.ownedCase(principal, businessCaseId);
+        businessCase.requireRevision(request.expectedRevision());
+        businessCase.updateOutline(request.title(), request.summary(), request.department());
+        auditRecorder.record(
+                principal,
+                AuditTargetType.BUSINESS_CASE,
+                String.valueOf(businessCaseId),
+                businessCase.getRevision(),
+                AuditAction.BUSINESS_CASE_UPDATED,
+                null,
+                "사업 개요 수정");
+        return toResponse(businessCase, visibleRequests(principal, businessCaseId));
+    }
+
+    private List<SecurityRequest> visibleRequests(MemberPrincipal principal, Long caseId) {
+        return securityRequestRepository.findByBusinessCaseIdOrderByIdAsc(caseId).stream()
+                .filter(request -> accessPolicy.canViewRequest(principal, request))
+                .toList();
+    }
+
+    private void prefillCaseAnswers(BusinessCase businessCase, FieldSchema schema) {
+        Long caseId = businessCase.getId();
+        for (FieldDefinition field : schema.caseFields()) {
+            String preset = presetValue(field.key(), businessCase);
+            if (preset != null && !field.isStaffField()) {
+                kr.securityadvisor.request.domain.AnswerFieldPolicy.validate(field, preset);
+                answerRepository.save(Answer.userAnswer(AnswerScope.CASE, caseId, null, field.key(), preset));
+            } else if (field.isStaffField()) {
+                answerRepository.save(Answer.staffCheckNeeded(AnswerScope.CASE, caseId, null, field.key()));
+            }
+        }
+    }
+
+    private void prefillRequestPlaceholders(SecurityRequest request, FieldSchema schema) {
+        for (FieldDefinition field : schema.requestFields(request.getDocType())) {
+            if (field.isStaffField()) {
+                answerRepository.save(Answer.staffCheckNeeded(
+                        AnswerScope.REQUEST, request.getBusinessCaseId(), request.getId(), field.key()));
+            }
+        }
+    }
+
+    /** 생성 요청에서 바로 채울 수 있는 공통 항목(seed 게시본의 저장 키 기준). 값이 없으면 null. */
+    private static String presetValue(String fieldKey, BusinessCase businessCase) {
+        String value = switch (fieldKey) {
+            case "project.name" -> businessCase.getTitle();
+            case "project.summary" -> businessCase.getSummary();
+            case "project.department" -> businessCase.getDepartment();
+            default -> null;
+        };
+        return (value == null || value.isBlank()) ? null : value;
+    }
+
+    private BusinessCaseResponse toResponse(BusinessCase businessCase, List<SecurityRequest> requests) {
+        List<AnswerResponse> caseAnswers =
+                answerRepository
+                        .findByBusinessCaseIdAndScopeOrderByFieldKeyAsc(businessCase.getId(), AnswerScope.CASE)
+                        .stream()
+                        .map(AnswerResponse::from)
+                        .toList();
+        return BusinessCaseResponse.from(
+                businessCase,
+                ProgressSummary.of(requests),
+                requests.stream().map(SecurityRequestSummary::from).toList(),
+                caseAnswers);
+    }
+}

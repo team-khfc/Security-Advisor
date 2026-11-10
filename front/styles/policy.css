@@ -1,0 +1,78 @@
+.policy-table {
+  min-width: 88rem;
+}
+.policy-table th[scope='row'] {
+  padding: 1.2rem;
+  text-align: left;
+  white-space: nowrap;
+}
+.policy-table td {
+  overflow-wrap: anywhere;
+}
+.policy-detail {
+  display: grid;
+  gap: 1.6rem;
+  min-width: 0;
+}
+dialog:has(.policy-detail) {
+  overflow: hidden;
+}
+.policy-detail > p,
+.policy-detail form > p,
+.policy-detail .field,
+.policy-values {
+  margin: 0;
+}
+.policy-detail > .badge {
+  justify-self: start;
+}
+.policy-detail > .btn-row:empty {
+  display: none;
+}
+.policy-detail form {
+  display: grid;
+  gap: 1.6rem;
+}
+.policy-values {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0.6rem 1.6rem;
+}
+.policy-values dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.policy-values dt {
+  font-weight: 700;
+}
+.policy-note {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  margin-block: 1rem;
+}
+.policy-confirm {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+}
+.policy-confirm input {
+  flex-shrink: 0;
+  margin-top: 0.4rem;
+}
+.policy-dates {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.6rem;
+}
+.policy-dates input {
+  width: 100%;
+  min-width: 0;
+}
+.policy-result {
+  margin-block: 1.6rem;
+}
+@media (max-width: 479px) {
+  .policy-dates {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
