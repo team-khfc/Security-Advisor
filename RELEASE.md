@@ -4,7 +4,7 @@
 
 | 경로 | 원본 | 릴리스 태그 | 커밋 |
 |---|---|---|---|
-| back/ | team-khfc/Security-Advisor-Back | v1.0.0-demo.20261111 | c58a3b2638f6f3f4a6cd75180570da3d759120fd |
+| back/ | team-khfc/Security-Advisor-Back | v1.0.1-demo.20261111 | 16ae480a344940b00f023f11d3d8d39dba42efe6 |
 | front/ | team-khfc/Security-Advisor-Front | v1.0.0-demo.20261111 | 8bc1470f98db896752fd24e54b7a57ad5ab0a9eb |
 
 원본 PR: [백엔드 #31](https://github.com/team-khfc/Security-Advisor-Back/pull/31), [프론트 #79](https://github.com/team-khfc/Security-Advisor-Front/pull/79), [프론트 #80](https://github.com/team-khfc/Security-Advisor-Front/pull/80). 각 PR의 GitHub 검사를 통과한 뒤 main에 반영한 버전이다.
@@ -28,3 +28,5 @@
 - 설치·테스트·촬영·실제 AI 연결 안내와 자동 통합 검사
 
 검증 범위와 결과: [JUDGE_VALIDATION.md](docs/JUDGE_VALIDATION.md).
+
+협의 요약 출력 중단·근거 오류 구분 수정: [백엔드 #32](https://github.com/team-khfc/Security-Advisor-Back/pull/32). 문서 전용 모델은 8192토큰·우선순위 4로 초기화하며 기존 설치는 관리자 설정으로 변경한다.
