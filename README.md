@@ -1,15 +1,45 @@
-# 보안길잡이 AI
+# SecurityAdvisor — 완성본·배포 저장소
 
-공공기관 현업 담당자가 AI와 대화하며 방화벽 신청서를 작성하고, ICT인프라·정보보안 담당자가 함께 검토하는 서비스의 프론트엔드입니다. 화면마다 파일을 나눠 여러 디자이너가 동시에 작업할 수 있게 구성했습니다.
+이 저장소는 Back·Front 릴리스 스냅샷과 전체 실행 구성을 모으는 **SecurityAdvisor 완성본·배포·공공GitLab 제출 저장소**입니다. 저장소 역할과 릴리스 절차는 [AGENTS.md](AGENTS.md) 0장과 [CONTRIBUTING.md](CONTRIBUTING.md) 2장을 따릅니다.
 
-> **이 저장소의 용도:** 디자인 담당 전용 작업 저장소입니다. 팀 저장소(`team-khfc/prototype`의 `보안길잡이 디자인시안 프로토타입/`)에 병합하기 전에 팀장·팀원이 화면과 변경 내용을 확인하는 곳입니다.
->
-> - 바로 보기: https://team-khfc.github.io/prototype-soo/ (GitHub Pages를 켠 경우)
-> - 출발점: 팀 저장소 `team-khfc/prototype` 커밋 `3900181` (2026-11-06)
-> - 팀 저장소와 달라진 점: [`MERGE_NOTES.md`](MERGE_NOTES.md)
-> - 디자인 규칙: [`docs/design.md`](docs/design.md) (디자인 담당 관리)
+## 현재 상태
 
-## 실행
+2026-11-10 문서 동기화 기준으로 애플리케이션 파일은 정적 디자인 시안입니다. `back/`·`front/` 릴리스 스냅샷, 전체 실행용 `compose.yaml`, `RELEASE.md`는 아직 구성되지 않았습니다. 아래 실행 명령으로 확인할 수 있는 범위는 브라우저 저장소를 사용하는 정적 시안입니다. 실제 Back·Front 통합 실행본의 빌드·구동·smoke 검증은 후속 작업으로 남아 있습니다.
+
+## 작업 전 참조 문서
+
+1. [PROJECT_CONTEXT.md](PROJECT_CONTEXT.md): 기준 버전 표·확정 결정·미결 사항·제출 체크리스트
+2. [FUNCTIONAL_SPEC.md](FUNCTIONAL_SPEC.md): 업무 규칙·도메인·불변식·상태·스키마
+3. [AGENTS.md](AGENTS.md): 저장소 역할·개발 실행 규칙·디자인 시안 운영·AI 에이전트 규칙
+4. [PROJECT_RULES.md](PROJECT_RULES.md): 범위·일정·의사결정·문서 개정 절차
+5. [CONTRIBUTING.md](CONTRIBUTING.md): 협업·릴리스 절차·데이터 계약·수용 기준
+6. [CODING_STYLE.md](CODING_STYLE.md)와 [SECURE_CODING.md](SECURE_CODING.md): 코드 작성·보안 기준
+7. [design.md](design.md): KRDS·화면·접근성 기준
+8. [claude/INSTRUCTIONS.md](claude/INSTRUCTIONS.md): 프로젝트 요약 지침
+
+공개 규칙 사본의 비식별 변환 범위와 원본·공개본 해시는 [docs/SOURCE_PROVENANCE.md](docs/SOURCE_PROVENANCE.md)에 기록합니다. 버전 확인 방법은 [AGENTS.md](AGENTS.md) 9장을 따릅니다.
+
+### 문서 검사
+
+```bash
+python3 tools/check_doc_versions.py
+```
+
+이 명령은 기준 버전·문서 경로·공개본 출처를 점검합니다. 애플리케이션 빌드와 통합 구동의 검사 결과는 해당 변경의 검증 기록으로 관리합니다.
+
+## 개발과 디자인의 참조 위치
+
+| 영역 | 저장소·문서 |
+| --- | --- |
+| 서버·DB 개발과 API 계약 | [Security-Advisor-Back](https://github.com/team-khfc/Security-Advisor-Back) |
+| 화면 개발 | [Security-Advisor-Front](https://github.com/team-khfc/Security-Advisor-Front) |
+| 디자인 시안 원본 | [prototype-soo](https://github.com/team-khfc/prototype-soo) · [미리보기](https://team-khfc.github.io/prototype-soo/) |
+| 디자인 규칙 원본 | [prototype-soo/docs/design.md](https://github.com/team-khfc/prototype-soo/blob/main/docs/design.md) |
+| 현재 보관된 정적 시안의 과거 변경 기록 | [MERGE_NOTES.md](MERGE_NOTES.md) |
+
+기능 개발은 Back·Front에서 진행하고, 이 저장소의 스냅샷 갱신은 [CONTRIBUTING.md](CONTRIBUTING.md) 2장의 릴리스 절차를 따릅니다.
+
+## 정적 시안 실행
 
 빌드 없이 바로 열 수 있습니다. 화면 사이 데이터를 브라우저 저장소에 보관하므로 로컬 서버로 여는 것을 권장합니다.
 
@@ -83,7 +113,7 @@ ACT['search'] = (버튼, 신청, 이벤트) => { ... };   // data-act="search" �
 
 ## 디자인 기준
 
-KRDS 기반 디자인 규칙은 `docs/design.md`를 따릅니다. 새 신청 문서 분석 시험용 기획서는 `samples/`에 있습니다.
+KRDS 기반 디자인 규칙은 [design.md](design.md)를 따릅니다. 현재 디자인 시안 원본과의 차이를 확인할 때는 위의 prototype-soo 링크를 사용합니다. 문서 분석 시연에는 합성 자료를 사용합니다.
 
 ## 외부 라이브러리
 

@@ -1,0 +1,17 @@
+name: 문서 기준 검사
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  documents:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: 기준 버전과 공개본 출처 검사
+        run: python3 tools/check_doc_versions.py
