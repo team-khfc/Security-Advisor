@@ -288,3 +288,7 @@ docker compose ps -a
 | [업무 명세](FUNCTIONAL_SPEC.md) | 역할·절차·도메인 규칙 |
 
 기능 개발 원본: [프론트](https://gitlab.aigov.go.kr/pocketmun1216/securityadvisor-front) · [백엔드](https://gitlab.aigov.go.kr/pocketmun1216/securityadvisor-back). 이 저장소의 `back/`, `front/`는 릴리스 스냅샷이며 수정은 원본에서 수행한 후 갱신합니다. 루트의 HTML·assets·partials는 [이전 시안](docs/LEGACY_PROTOTYPE_README.md)이며, 실제 서비스는 Docker로 실행합니다.
+
+## 모의데이터 설명서
+
+[구성·역할별 계정·시나리오·투입 방법](docs/MOCK_DATA_GUIDE.md) · [붙임 원본](docs/attachments/mock-data-description.docx)

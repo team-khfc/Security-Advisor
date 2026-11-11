@@ -9,3 +9,5 @@
 - [처음 실행하기](../README.md)
 
 기존 docs의 ADR·API 계약·검증 기록은 보존한다. 과거 검증 기록은 당시 결과이고 위 가이드는 현재 코드·설정과 대조한 운영 안내다. GitHub와 공공 GitLab에 동일한 문서·규칙을 반영해도 기존 애플리케이션 버전은 서로 다를 수 있다.
+
+- [모의데이터 구성·시연·초기화 설명서](MOCK_DATA_GUIDE.md) · [제공된 Word 원본](attachments/mock-data-description.docx)
