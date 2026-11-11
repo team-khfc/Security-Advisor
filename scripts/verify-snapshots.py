@@ -18,7 +18,10 @@ for name, entry in manifest.items():
         for path in (root / name).rglob('*') if path.is_file()
         and not any(part in {'.next', 'node_modules', '.gradle', 'build'} for part in path.parts)
     }
-    if actual != entry['files']:
-        changed = sorted(key for key in actual.keys() | entry['files'].keys() if actual.get(key) != entry['files'].get(key))
+    expected = {row['path']: row['sha256'] for row in entry['files']}
+    if len(expected) != len(entry['files']):
+        raise SystemExit(f'{name}: duplicate snapshot paths')
+    if actual != expected:
+        changed = sorted(key for key in actual.keys() | expected.keys() if actual.get(key) != expected.get(key))
         raise SystemExit(f'{name}: snapshot mismatch: {changed}')
     print(f"PASS {name}: {len(actual)} files, source {entry['commit']}")

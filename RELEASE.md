@@ -4,10 +4,10 @@
 
 | 경로 | 원본 | 릴리스 태그 | 커밋 |
 |---|---|---|---|
-| back/ | team-khfc/Security-Advisor-Back | v1.0.2-demo.20261111 | d668c16572ca7a8702b3271b9f1b5940b075a11d |
-| front/ | team-khfc/Security-Advisor-Front | v1.0.0-demo.20261111 | 8bc1470f98db896752fd24e54b7a57ad5ab0a9eb |
+| back/ | team-khfc/Security-Advisor-Back | v1.0.3-demo.20261111 | db6c2f1dc2c9d68cfb73783d7de1d14a5995842f |
+| front/ | team-khfc/Security-Advisor-Front | v1.0.3-demo.20261111 | b7db949db64081b5c45bb0387d7886427601afc7 |
 
-원본 PR: [백엔드 #31](https://github.com/team-khfc/Security-Advisor-Back/pull/31), [프론트 #79](https://github.com/team-khfc/Security-Advisor-Front/pull/79), [프론트 #80](https://github.com/team-khfc/Security-Advisor-Front/pull/80). 각 PR의 GitHub 검사를 통과한 뒤 main에 반영한 버전이다.
+원본 PR: [백엔드 #31](https://github.com/team-khfc/Security-Advisor-Back/pull/31), [프론트 #79](https://github.com/team-khfc/Security-Advisor-Front/pull/79), [프론트 #80](https://github.com/team-khfc/Security-Advisor-Front/pull/80). 위 PR들은 주요 기능의 개발 이력이다. 현재 스냅샷의 정확한 기준은 위 표의 태그·커밋이며, 이후 보안 검사 대응 변경도 포함한다.
 
 ## 스냅샷 처리
 
@@ -33,6 +33,11 @@
 
 GPT 협의 요약의 근거 식별자 매핑 수정: [백엔드 #33](https://github.com/team-khfc/Security-Advisor-Back/pull/33). API와 저장 형식은 유지하고 실제 GPT 2회 검증을 통과했다.
 
-## 유지보수와 공공 GitLab
+공공 GitLab 제출 검사 대응: SMTP의 TLS 및 인증서 검증 강제, minimatch 11.0.1 보안 수정, 비밀값이 아닌 테스트 예제 명확화. 스냅샷 해시는 path/sha256 필드로 구분하며 전체 무결성 검증을 유지한다.
 
-개발·통합 배포·업데이트 절차는 [README](README.md#개발부터-통합-배포까지)를 따릅니다. [공공 GitLab 배포본](https://gitlab.aigov.go.kr/pocketmun1216/securityadvisor)은 별도 릴리스가 반영되어 있을 수 있으며, 이 저장소의 배포 출처는 위 표가 기준입니다. README 동기화만으로 소스 스냅샷이 교체되지는 않습니다.
+## 공공 GitLab 개발 원본
+
+- [Front](https://gitlab.aigov.go.kr/pocketmun1216/securityadvisor-front) · [Back](https://gitlab.aigov.go.kr/pocketmun1216/securityadvisor-back)
+- 위 표의 `v1.0.3-demo.20261111` 태그는 공공 GitLab에도 동일한 커밋으로 이관했다. 보안 수정의 GitHub PR은 Front #81, Back #34이며 CI 통과 커밋을 배포본에 포함했다. GitHub main 병합 여부와 배포본 포함 여부는 구분한다.
+- 공공 GitLab main에는 이관용 README 변경이 추가되어 있으므로 main과 스냅샷의 커밋이 다를 수 있다. 배포본 재현에는 표의 태그·커밋을 사용한다.
+- 개발·스냅샷 교체·통합 검증·기존 설치 업데이트는 [README 유지보수 안내](README.md#개발부터-통합-배포까지)를 따른다.
