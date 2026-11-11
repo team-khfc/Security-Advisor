@@ -1,5 +1,7 @@
 # 보안길잡이 AI · SecurityAdvisor
 
+개발자 안내: [개발·유지보수 가이드](docs/README.md) · [적용 규칙](docs/RULES_GUIDE.md) · [DB·설치 설정](docs/DEVELOPMENT_MAINTENANCE.md) · [LLM 구성 변경](docs/LLM_CONFIGURATION.md)
+
 2026년 공공 AI 대전환 챌린지 제출작
 
 **반복되는 보안 업무는 자동으로, 담당자 협의까지 편리하게.**
