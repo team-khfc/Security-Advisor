@@ -32,3 +32,7 @@
 협의 요약 출력 중단·근거 오류 구분 수정: [백엔드 #32](https://github.com/team-khfc/Security-Advisor-Back/pull/32). 문서 전용 모델은 8192토큰·우선순위 4로 초기화하며 기존 설치는 관리자 설정으로 변경한다.
 
 GPT 협의 요약의 근거 식별자 매핑 수정: [백엔드 #33](https://github.com/team-khfc/Security-Advisor-Back/pull/33). API와 저장 형식은 유지하고 실제 GPT 2회 검증을 통과했다.
+
+## 유지보수와 공공 GitLab
+
+개발·통합 배포·업데이트 절차는 [README](README.md#개발부터-통합-배포까지)를 따릅니다. [공공 GitLab 배포본](https://gitlab.aigov.go.kr/pocketmun1216/securityadvisor)은 별도 릴리스가 반영되어 있을 수 있으며, 이 저장소의 배포 출처는 위 표가 기준입니다. README 동기화만으로 소스 스냅샷이 교체되지는 않습니다.
